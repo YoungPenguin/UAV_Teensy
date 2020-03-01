@@ -10,9 +10,14 @@
 
  //read angles and forces from gyroaccelerometer
 
-#include <Wire.h>
 #include <Servo.h>
-#include "MPU9250.h"
+#include <NXPMotionSense.h>
+#include <Wire.h>
+#include <EEPROM.h>
+#include <util/crc16.h>
+
+NXPMotionSense imu;
+NXPSensorFusion filter;
 
 Servo prop__1;
 Servo prop__2;
@@ -25,33 +30,23 @@ unsigned long counter_1, counter_2, counter_3, counter_4, current_count;
 
 byte last_CH1_state, last_CH2_state, last_CH3_state, last_CH4_state;
 
-int input_YAW;      // channel 4 of the receiver and pin D12 of arduino
-int input_PITCH;    // channel 3 of the receiver and pin D9 of arduino
-int input_ROLL;     // channel 2 of the receiver and pin D8 of arduino
+int input_YAW = 0;      // channel 4 of the receiver and pin D12 of arduino
+int input_PITCH = 0;    // channel 3 of the receiver and pin D9 of arduino
+int input_ROLL = 0;     // channel 2 of the receiver and pin D8 of arduino
 int input_THROTTLE; // channel 1 of the receiver and pin D10 of arduino
+
+
 
 //Gyro Variables
 float elapsedTime, time, timePrev;        //Variables for time control
-int gyro_error = 0;                       //We use this variable to only calculate once the gyro data error
-float Gyr_rawX, Gyr_rawY, Gyr_rawZ;       //Here we store the raw data read
-float Gyro_angle_x, Gyro_angle_y;         //Here we store the angle value obtained with Gyro data
-float Gyro_raw_error_x, Gyro_raw_error_y; //Here we store the initial gyro data error
-float difference=0;
-float main_loop_timer = 0;
 
-//Acc Variables
-int acc_error = 0;                          //We use this variable to only calculate once the Acc data error
-float rad_to_deg = 180 / 3.141592654;       //This value is for pasing from radians to degrees values
-float Acc_rawX, Acc_rawY, Acc_rawZ;         //Here we store the raw data read
-float Acc_angle_x, Acc_angle_y;             //Here we store the angle value obtained with Acc data
-float Acc_angle_error_x, Acc_angle_error_y; //Here we store the initial Acc data error
 
-float Total_angle_x, Total_angle_y;
+float ax, ay, az;
+float gx, gy, gz;
+float mx, my, mz; 
+float roll, pitch, yaw, yaw_previous, yaw_difference;
+float total_yaw=0;
 
-int i;
-int mot_activated = 0;
-long activate_count = 0;
-long des_activate_count = 0;
 
 //////////////////////////////PID FOR ROLL///////////////////////////
 float roll_PID, pwm_1, pwm_2, pwm_3, pwm_4, pwm_5, pwm_6, roll_error, roll_previous_error;
@@ -59,9 +54,9 @@ float roll_pid_p = 0;
 float roll_pid_i = 0;
 float roll_pid_d = 0;
 ///////////////////////////////ROLL PID CONSTANTS////////////////////
-double roll_kp = 3.2;         //3.55
-double roll_ki = 0.06;       //0.003
-double roll_kd = 0.014;//.2;         //2.05
+double roll_kp = 1.2;         //3.55
+double roll_ki = 0.01;       //0.003
+double roll_kd = 25;//.2;         //2.05, 15
 float roll_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR PITCH//////////////////////////
@@ -70,17 +65,31 @@ float pitch_pid_p = 0;
 float pitch_pid_i = 0;
 float pitch_pid_d = 0;
 ///////////////////////////////PITCH PID CONSTANTS///////////////////
-double pitch_kp = 0.1;       //3.55
-double pitch_ki = 0.03;       //0.003
-double pitch_kd = 80.0;//.22;        //2.05
+double pitch_kp = 1.2;       //3.55
+double pitch_ki = 0.02;       //0.003
+double pitch_kd = 25;//.22;        //2.05
 float pitch_desired_angle = 0; //This is the angle in which we whant the
-float yaw_desired_angle = 0;
 
-MPU9250 IMU(Wire,0x68);
-int status;
+//////////////////////////////PID FOR YAW//////////////////////////
+float yaw_PID, yaw_error, yaw_previous_error;
+float yaw_pid_p = 0;
+float yaw_pid_i = 0;
+float yaw_pid_d = 0;
+///////////////////////////////YAW PID CONSTANTS///////////////////
+double yaw_kp = 5;       //3.55, 0.3, 150
+double yaw_ki = 0.05;       //0.003, 0.0, 200.5
+double yaw_kd = 10;//.22;        //2.05, 15.0, 100 
+float yaw_desired_angle = 0; //This is the angle in which we whant the
+float yaw_desired_angle_set = 0;
+
+float difference =0;
+float main_loop_timer = 0;
+
+elapsedMillis MPL = 0;
 
 void setup() {
 
+  Serial.begin(9600);
 
   pinMode(14, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(14), blink, CHANGE);
@@ -110,109 +119,149 @@ void setup() {
 
 ////////////////////////////////////////////////////////////////////////////////////
   
-  // serial to display data
-  Serial.begin(115200);
-  while(!Serial) {}
-
-  // start communication with IMU 
-  status = IMU.begin();
-  if (status < 0) {
-    Serial.println("IMU initialization unsuccessful");
-    Serial.println("Check IMU wiring or try cycling power");
-    Serial.print("Status: ");
-    Serial.println(status);
-    while(1) {}
-  }
-
-
-Gyro_raw_error_x=0;
-Gyro_raw_error_y=0;
-Acc_angle_error_x=0;
-Acc_angle_error_y=0;
  
+ while(!Serial);
+  imu.begin();
+
+  filter.begin(100);
+
+  //sets local sea level pressure
+  //you can get this from your closest airport from
+  //     https://aviationweather.gov/metar
+  imu.setSeaPressure(98900);
+
+
 }
 void loop()
 {
+  
+//float altitude_val;
 
+  
   /////////////////////////////I M U/////////////////////////////////////
   timePrev = time; 
   time = millis(); 
   elapsedTime = (time - timePrev) / 1000;
-
   //////////////////////////////////////Gyro read/////////////////////////////////////
-
-  IMU.readSensor();
-
- 
-
-  Gyr_rawX = IMU.getGyroX_rads();
-  Gyr_rawY = IMU.getGyroY_rads();
   
-   /*---X---*/
-  Gyr_rawX = (Gyr_rawX / 32.8) - Gyro_raw_error_x;
-  /*---Y---*/
-  Gyr_rawY = (Gyr_rawY / 32.8) - Gyro_raw_error_y;
-
-  /*---X---*/
-  Gyro_angle_x = Gyr_rawX * elapsedTime;
-  /*---X---*/
-  Gyro_angle_y = Gyr_rawY * elapsedTime;
-
-  //////////////////////////////////////Acc read/////////////////////////////////////
- 
-  //val her ændres alt for meget
-  Acc_rawX = IMU.getAccelX_mss();
-  Acc_rawY = IMU.getAccelY_mss();
-  Acc_rawZ = IMU.getAccelZ_mss();
+  if (input_THROTTLE > 1020) {
   
+  if(imu.available()){
+  imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
+    // Update the SensorFusion filter
+  filter.update(gx, gy, gz, ax, ay, az, mx, my, mz);
 
-  /*---X---*/
-  Acc_angle_x = (atan((Acc_rawY) / sqrt(pow((Acc_rawX), 2) + pow((Acc_rawZ), 2))) * rad_to_deg) - Acc_angle_error_x;
-  /*---Y---*/
-  Acc_angle_y = (atan(-1 * (Acc_rawX) / sqrt(pow((Acc_rawY), 2) + pow((Acc_rawZ), 2))) * rad_to_deg) - Acc_angle_error_y;
+    // print the heading, pitch and roll
+  roll = -1*filter.getRoll();
+  pitch = -1*(filter.getPitch());
+  yaw = filter.getYaw();
+   
+   if(MPL > 100){
+      //reading pressure causes a noticable delay as a result of
+      //switching between altimeter and barometer modes of the
+      //MPL3115.
+      imu.readAltitude();
+//      altitude_val = imu.altitudeM;
+      MPL = 0;
+      }
 
-  //////////////////////////////////////Total angle and filter/////////////////////////////////////
-  /*---X axis angle---*/
-  Total_angle_x = 0.98 * (Total_angle_x + Gyro_angle_x) + 0.02 * Acc_angle_x;
-  /*---Y axis angle---*/
-  Total_angle_y = 0.98 * (Total_angle_y + Gyro_angle_y) + 0.02 * Acc_angle_y;
+  yaw_difference = (yaw_previous - yaw);
+
+  yaw_previous = yaw;
+   
+  if(yaw_difference < -20)
+  {
+    yaw = 1;
+  }
+  else if(yaw_difference > 20)
+  {
+    yaw = -1;
+  }
+  else {
+    yaw = yaw_difference;
+  }
+
+  total_yaw += yaw;
 
   roll_desired_angle = map(input_ROLL, 1000, 2000, -20, 20);
   pitch_desired_angle = map(input_PITCH, 1000, 2000, -20, 20);
-  yaw_desired_angle = map(input_YAW, 1000, 2000, -20, 20);
+  yaw_desired_angle_set = map(input_YAW, 1000, 2000, -1, 1);
+  yaw_desired_angle_set = yaw_desired_angle_set/10;
+  
+  yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
 
+  
+  Serial.print(yaw);
+  Serial.print(" ");
+  Serial.print(total_yaw);
+  Serial.print(" ");
+  Serial.print(yaw_desired_angle);
+  Serial.println();
+  
+  
   /*///////////////////////////P I D///////////////////////////////////*/
   
-  roll_error = Total_angle_y - roll_desired_angle;
-  pitch_error = Total_angle_x - 0;
+  roll_error = roll - roll_desired_angle;
+  pitch_error = pitch - pitch_desired_angle;
+  yaw_error = total_yaw - yaw_desired_angle;
 
   roll_pid_p = roll_kp * roll_error;
   pitch_pid_p = pitch_kp * pitch_error;
- pitch_pid_i = pitch_pid_i+(pitch_ki*pitch_error);  
+  yaw_pid_p = yaw_kp * yaw_error;
 
-pitch_pid_i =anti_windup(pitch_pid_i, -2, 2);
+  roll_pid_i = roll_pid_i+(roll_ki*roll_error); 
+  pitch_pid_i = pitch_pid_i+(pitch_ki*pitch_error);  
+  yaw_pid_i = yaw_pid_i+(yaw_ki*yaw_error);
 
-
+  /*
+  Serial.print(pitch_pid_i);
+  Serial.print(" ");
+  Serial.println();
+  */
+  /*
+  roll_pid_i =anti_windup(roll_pid_i, -2, 2);
+  pitch_pid_i =anti_windup(pitch_pid_i, -2, 2);
+  yaw_pid_i =anti_windup(yaw_pid_i, -2, 2);
+  */
 
   roll_pid_d = roll_kd * ((roll_error - roll_previous_error) );
   pitch_pid_d = pitch_kd * ((pitch_error - pitch_previous_error));
+  yaw_pid_d = yaw_kd * ((yaw_error - yaw_previous_error));
 
   roll_PID = roll_pid_p + roll_pid_i + roll_pid_d;
   pitch_PID = pitch_pid_p + pitch_pid_i + pitch_pid_d;
+  yaw_PID = yaw_pid_p + yaw_pid_i + yaw_pid_d;
 
   /*///////////////////////////P I D///////////////////////////////////*/
 
   roll_PID = anti_windup(roll_PID, -400, 400);
   pitch_PID = anti_windup(pitch_PID, -400, 400);
+  yaw_PID = anti_windup(yaw_PID, -400, 400);
 
   /* hex-x config */
-  pwm_1 = input_THROTTLE - roll_desired_angle - 1.732 * pitch_PID - yaw_desired_angle;
-  pwm_2 = input_THROTTLE - 1 / 2 * roll_desired_angle + yaw_desired_angle;
-  pwm_3 = input_THROTTLE - roll_desired_angle + 1.732 * pitch_PID - yaw_desired_angle;
-  pwm_4 = input_THROTTLE + roll_desired_angle + 1.732 * pitch_PID + yaw_desired_angle;
-  pwm_5 = input_THROTTLE + 1 / 2 * roll_PID - yaw_desired_angle;
-  pwm_6 = input_THROTTLE + roll_desired_angle - 1.732 * pitch_PID + yaw_desired_angle;
+  pwm_1 = input_THROTTLE - roll_PID - 1.732 * pitch_PID - yaw_PID;
+  pwm_2 = input_THROTTLE - 1 / 2 * roll_PID + yaw_PID;
+  pwm_3 = input_THROTTLE - roll_PID + 1.732 * pitch_PID - yaw_PID;
+  pwm_4 = input_THROTTLE + roll_PID + 1.732 * pitch_PID + yaw_PID;
+  pwm_5 = input_THROTTLE + 1 / 2 * roll_PID - yaw_PID;
+  pwm_6 = input_THROTTLE + roll_PID - 1.732 * pitch_PID + yaw_PID; // roll, pitch, yaw
 
+  /*
+  Serial.print(pwm_1);
+  Serial.print(" ");
+  //Serial.print(pwm2);
+  //Serial.print(" ");
+  Serial.print(pwm_3);
+  Serial.print(" ");
+  Serial.print(pwm_4);
+  Serial.print(" ");
+ // Serial.print(pwm5);
+ // Serial.print(" ");
+  Serial.print(pwm_6);
+  Serial.print(" ");
+  Serial.println();
+  */
+  
   pwm_1 = anti_windup(pwm_1, 1000, 2000);
   pwm_2 = anti_windup(pwm_2, 1000, 2000);
   pwm_3 = anti_windup(pwm_3, 1000, 2000);
@@ -220,21 +269,29 @@ pitch_pid_i =anti_windup(pitch_pid_i, -2, 2);
   pwm_5 = anti_windup(pwm_5, 1000, 2000);
   pwm_6 = anti_windup(pwm_6, 1000, 2000);
 
-  if (input_THROTTLE > 1020) {
     prop__1.writeMicroseconds(pwm_1);
-    prop__2.writeMicroseconds(1000);
+    prop__2.writeMicroseconds(pwm_2);
     prop__3.writeMicroseconds(pwm_3);
     prop__4.writeMicroseconds(pwm_4);
-    prop__5.writeMicroseconds(1000);
+    prop__5.writeMicroseconds(pwm_5);
     prop__6.writeMicroseconds(pwm_6);
 
   
   }
+  }
   if (input_THROTTLE < 1000) {
+    Serial.println("Stop all");
    stopAll();
+   roll_pid_i = 0; 
+  pitch_pid_i =0;  
+  yaw_pid_i = 0;
   }
  pitch_previous_error = pitch_error; 
+ roll_previous_error = roll_error;
+ yaw_previous_error = yaw_error;
+ 
 }
+
 
 void blink() {
 
@@ -329,4 +386,26 @@ void Test_print() {
   Serial.print(pwm_5);
   Serial.print("  -  ");
   Serial.println(pwm_6);
+}
+
+/*
+void statePrint() {
+  Serial.print("roll: ");
+  Serial.print(roll);
+  Serial.print(" pitch: ");
+  Serial.print(pitch);
+  Serial.print(" yaw: ");
+  Serial.print(yaw);
+  Serial.print(" altitude");
+  Serial.print(altitude_val);
+  Serial.println();
+}
+*/
+void maintain_loop_time () {
+  difference = micros() - main_loop_timer;
+  while (difference < 5000) {
+    difference = micros() - main_loop_timer;
+  }
+  //Serial.println(difference);
+  main_loop_timer = micros();
 }
