@@ -1,8 +1,8 @@
 # UAV_Teensy
 ***IMPORTANT!!!***
-****Make sure all inputs and sensors are set in the same direction as the code is written***
-****TAKE YOUR F****** PROPELLERS OFF!***
-****DON'T BE STUPID***
+ - ****Make sure all inputs and sensors are set in the same direction as the code is written***
+ - ****TAKE YOUR F****** PROPELLERS OFF!***
+ - ****DON'T BE STUPID***
 
 UAV PID control with teensy 3.6
 
