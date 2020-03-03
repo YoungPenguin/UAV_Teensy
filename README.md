@@ -20,7 +20,7 @@ UAV specs:
 - Arm length: 400mm
 
 
-Data processing tooles used:
+Data processing tools used:
 - [Python](https://www.python.org/) 
 - [Processing](https://processing.org/) 
 - [Matlab](https://www.mathworks.com/) 
