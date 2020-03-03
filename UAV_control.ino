@@ -1,4 +1,4 @@
- /*
+/*
  *       UAV-configuration:
  *         3-cw  4-ccw
  *      
@@ -54,9 +54,9 @@ float roll_pid_p = 0;
 float roll_pid_i = 0;
 float roll_pid_d = 0;
 ///////////////////////////////ROLL PID CONSTANTS////////////////////
-double roll_kp = 1.2;         //3.55
-double roll_ki = 0.01;       //0.003
-double roll_kd = 25;//.2;         //2.05, 15
+double roll_kp = 1.33;         //3.55
+double roll_ki = 0.043;       //0.003
+double roll_kd =36;//.2;         //2.05, 15
 float roll_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR PITCH//////////////////////////
@@ -65,9 +65,9 @@ float pitch_pid_p = 0;
 float pitch_pid_i = 0;
 float pitch_pid_d = 0;
 ///////////////////////////////PITCH PID CONSTANTS///////////////////
-double pitch_kp = 1.2;       //3.55
-double pitch_ki = 0.02;       //0.003
-double pitch_kd = 25;//.22;        //2.05
+double pitch_kp = 1.33;       //3.55
+double pitch_ki = 0.043;       //0.003
+double pitch_kd = 37;//.22;        //2.05
 float pitch_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR YAW//////////////////////////
@@ -76,7 +76,7 @@ float yaw_pid_p = 0;
 float yaw_pid_i = 0;
 float yaw_pid_d = 0;
 ///////////////////////////////YAW PID CONSTANTS///////////////////
-double yaw_kp = 5;       //3.55, 0.3, 150
+double yaw_kp = 7;       //3.55, 0.3, 150
 double yaw_ki = 0.05;       //0.003, 0.0, 200.5
 double yaw_kd = 10;//.22;        //2.05, 15.0, 100 
 float yaw_desired_angle = 0; //This is the angle in which we whant the
@@ -120,7 +120,7 @@ void setup() {
 ////////////////////////////////////////////////////////////////////////////////////
   
  
- while(!Serial);
+ //while(!Serial);
   imu.begin();
 
   filter.begin(100);
@@ -143,8 +143,19 @@ void loop()
   time = millis(); 
   elapsedTime = (time - timePrev) / 1000;
   //////////////////////////////////////Gyro read/////////////////////////////////////
+
+  Serial.print(input_THROTTLE);
+  Serial.print(" ");
+  Serial.print(input_ROLL);
+  Serial.print(" ");
+  Serial.print(input_PITCH);
+  Serial.print(" ");
+  Serial.print(input_YAW);
+  Serial.print(" ");
+  Serial.println();
   
-  if (input_THROTTLE > 1020) {
+  if (input_THROTTLE > 1100) {
+    
   
   if(imu.available()){
   imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
@@ -152,8 +163,8 @@ void loop()
   filter.update(gx, gy, gz, ax, ay, az, mx, my, mz);
 
     // print the heading, pitch and roll
-  roll = -1*filter.getRoll();
-  pitch = -1*(filter.getPitch());
+  roll = -1*filter.getRoll();  
+  pitch = -1*(filter.getPitch()); 
   yaw = filter.getYaw();
    
    if(MPL > 100){
@@ -183,20 +194,16 @@ void loop()
 
   total_yaw += yaw;
 
-  roll_desired_angle = map(input_ROLL, 1000, 2000, -20, 20);
-  pitch_desired_angle = map(input_PITCH, 1000, 2000, -20, 20);
-  yaw_desired_angle_set = map(input_YAW, 1000, 2000, -1, 1);
+  roll_desired_angle = map(input_ROLL, 1000, 2000, -10, 10);
+  pitch_desired_angle = map(input_PITCH, 1000, 2000, -10, 10);
+  yaw_desired_angle_set = map(input_YAW, 1000, 2000, -2, 2);
   yaw_desired_angle_set = yaw_desired_angle_set/10;
   
   yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
 
   
-  Serial.print(yaw);
-  Serial.print(" ");
-  Serial.print(total_yaw);
-  Serial.print(" ");
-  Serial.print(yaw_desired_angle);
-  Serial.println();
+
+   
   
   
   /*///////////////////////////P I D///////////////////////////////////*/
@@ -209,34 +216,46 @@ void loop()
   pitch_pid_p = pitch_kp * pitch_error;
   yaw_pid_p = yaw_kp * yaw_error;
 
-  roll_pid_i = roll_pid_i+(roll_ki*roll_error); 
-  pitch_pid_i = pitch_pid_i+(pitch_ki*pitch_error);  
-  yaw_pid_i = yaw_pid_i+(yaw_ki*yaw_error);
+  roll_pid_i += (roll_ki*roll_error); 
+  pitch_pid_i += (pitch_ki*pitch_error);  
+  yaw_pid_i += (yaw_ki*yaw_error);
+
+ 
+  
 
   /*
   Serial.print(pitch_pid_i);
   Serial.print(" ");
   Serial.println();
   */
-  /*
-  roll_pid_i =anti_windup(roll_pid_i, -2, 2);
-  pitch_pid_i =anti_windup(pitch_pid_i, -2, 2);
-  yaw_pid_i =anti_windup(yaw_pid_i, -2, 2);
-  */
+  
+  roll_pid_i =anti_windup(roll_pid_i, -400, 400);
+  pitch_pid_i =anti_windup(pitch_pid_i, -400, 400);
+  yaw_pid_i =anti_windup(yaw_pid_i, -400, 400);
+ 
 
   roll_pid_d = roll_kd * ((roll_error - roll_previous_error) );
   pitch_pid_d = pitch_kd * ((pitch_error - pitch_previous_error));
   yaw_pid_d = yaw_kd * ((yaw_error - yaw_previous_error));
 
-  roll_PID = roll_pid_p + roll_pid_i + roll_pid_d;
-  pitch_PID = pitch_pid_p + pitch_pid_i + pitch_pid_d;
-  yaw_PID = yaw_pid_p + yaw_pid_i + yaw_pid_d;
+  roll_PID = roll_kp * roll_error + roll_pid_i + roll_kd * ((roll_error - roll_previous_error) );
+  pitch_PID = pitch_kp * pitch_error + pitch_pid_i + pitch_kd * ((pitch_error - pitch_previous_error));
+  yaw_PID = yaw_kp * yaw_error + yaw_pid_i + yaw_kd * ((yaw_error - yaw_previous_error));
+
+
+   pitch_previous_error = pitch_error; 
+   roll_previous_error = roll_error;
+   yaw_previous_error = yaw_error;
+  
 
   /*///////////////////////////P I D///////////////////////////////////*/
 
   roll_PID = anti_windup(roll_PID, -400, 400);
   pitch_PID = anti_windup(pitch_PID, -400, 400);
   yaw_PID = anti_windup(yaw_PID, -400, 400);
+
+  //Serial.print(roll_PID);
+  //Serial.print(" ");
 
   /* hex-x config */
   pwm_1 = input_THROTTLE - roll_PID - 1.732 * pitch_PID - yaw_PID;
@@ -245,6 +264,8 @@ void loop()
   pwm_4 = input_THROTTLE + roll_PID + 1.732 * pitch_PID + yaw_PID;
   pwm_5 = input_THROTTLE + 1 / 2 * roll_PID - yaw_PID;
   pwm_6 = input_THROTTLE + roll_PID - 1.732 * pitch_PID + yaw_PID; // roll, pitch, yaw
+
+  
 
   /*
   Serial.print(pwm_1);
@@ -269,6 +290,10 @@ void loop()
   pwm_5 = anti_windup(pwm_5, 1000, 2000);
   pwm_6 = anti_windup(pwm_6, 1000, 2000);
 
+  
+  
+  
+
     prop__1.writeMicroseconds(pwm_1);
     prop__2.writeMicroseconds(pwm_2);
     prop__3.writeMicroseconds(pwm_3);
@@ -286,9 +311,7 @@ void loop()
   pitch_pid_i =0;  
   yaw_pid_i = 0;
   }
- pitch_previous_error = pitch_error; 
- roll_previous_error = roll_error;
- yaw_previous_error = yaw_error;
+
  
 }
 
@@ -297,7 +320,7 @@ void blink() {
 
   current_count = micros();
   ///////////////////////////////////////Channel 1
-  if (GPIOB_PDIR & 1) { //pin 16
+  if (GPIOB_PDIR & 2) { //pin 17 (1B 16)
      
     if (last_CH1_state == 0) {                         
       last_CH1_state = 1;        //Store the current state into the last state for the next loop
@@ -310,7 +333,7 @@ void blink() {
   }
 
   ///////////////////////////////////////Channel 2
-  if (GPIOB_PDIR & 2) { //pin 17
+  if (GPIOB_PDIR & 1) { //pin 16
     if (last_CH2_state == 0) {
       last_CH2_state = 1;
       counter_2 = current_count;
@@ -323,7 +346,7 @@ void blink() {
 
   ///////////////////////////////////////Channel 3
   
-  if (GPIOD_PDIR & 2) {//pin 14                  pin D10 - B00000100
+  if (GPIOC_PDIR & 1) {//pin 15, D2                  pin D10 - B00000100
     if (last_CH3_state == 0) {
       last_CH3_state = 1;
       counter_3 = current_count;
@@ -336,7 +359,7 @@ void blink() {
 
 
   ///////////////////////////////////////Channel 4
-  if (GPIOC_PDIR & 1) { //pin 15
+  if (GPIOD_PDIR & 2) { //pin 14
     if (last_CH4_state == 0)  {
       last_CH4_state = 1;
       counter_4 = current_count;
