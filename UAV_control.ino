@@ -201,11 +201,6 @@ void loop()
   
   yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
 
-  
-
-   
-  
-  
   /*///////////////////////////P I D///////////////////////////////////*/
   
   roll_error = roll - roll_desired_angle;
@@ -220,20 +215,10 @@ void loop()
   pitch_pid_i += (pitch_ki*pitch_error);  
   yaw_pid_i += (yaw_ki*yaw_error);
 
- 
-  
-
-  /*
-  Serial.print(pitch_pid_i);
-  Serial.print(" ");
-  Serial.println();
-  */
-  
   roll_pid_i =anti_windup(roll_pid_i, -400, 400);
   pitch_pid_i =anti_windup(pitch_pid_i, -400, 400);
   yaw_pid_i =anti_windup(yaw_pid_i, -400, 400);
  
-
   roll_pid_d = roll_kd * ((roll_error - roll_previous_error) );
   pitch_pid_d = pitch_kd * ((pitch_error - pitch_previous_error));
   yaw_pid_d = yaw_kd * ((yaw_error - yaw_previous_error));
@@ -242,20 +227,15 @@ void loop()
   pitch_PID = pitch_kp * pitch_error + pitch_pid_i + pitch_kd * ((pitch_error - pitch_previous_error));
   yaw_PID = yaw_kp * yaw_error + yaw_pid_i + yaw_kd * ((yaw_error - yaw_previous_error));
 
-
    pitch_previous_error = pitch_error; 
    roll_previous_error = roll_error;
    yaw_previous_error = yaw_error;
   
-
   /*///////////////////////////P I D///////////////////////////////////*/
 
   roll_PID = anti_windup(roll_PID, -400, 400);
   pitch_PID = anti_windup(pitch_PID, -400, 400);
   yaw_PID = anti_windup(yaw_PID, -400, 400);
-
-  //Serial.print(roll_PID);
-  //Serial.print(" ");
 
   /* hex-x config */
   pwm_1 = input_THROTTLE - roll_PID - 1.732 * pitch_PID - yaw_PID;
@@ -264,24 +244,6 @@ void loop()
   pwm_4 = input_THROTTLE + roll_PID + 1.732 * pitch_PID + yaw_PID;
   pwm_5 = input_THROTTLE + 1 / 2 * roll_PID - yaw_PID;
   pwm_6 = input_THROTTLE + roll_PID - 1.732 * pitch_PID + yaw_PID; // roll, pitch, yaw
-
-  
-
-  /*
-  Serial.print(pwm_1);
-  Serial.print(" ");
-  //Serial.print(pwm2);
-  //Serial.print(" ");
-  Serial.print(pwm_3);
-  Serial.print(" ");
-  Serial.print(pwm_4);
-  Serial.print(" ");
- // Serial.print(pwm5);
- // Serial.print(" ");
-  Serial.print(pwm_6);
-  Serial.print(" ");
-  Serial.println();
-  */
   
   pwm_1 = anti_windup(pwm_1, 1000, 2000);
   pwm_2 = anti_windup(pwm_2, 1000, 2000);
@@ -289,11 +251,7 @@ void loop()
   pwm_4 = anti_windup(pwm_4, 1000, 2000);
   pwm_5 = anti_windup(pwm_5, 1000, 2000);
   pwm_6 = anti_windup(pwm_6, 1000, 2000);
-
-  
-  
-  
-
+   
     prop__1.writeMicroseconds(pwm_1);
     prop__2.writeMicroseconds(pwm_2);
     prop__3.writeMicroseconds(pwm_3);
@@ -301,7 +259,6 @@ void loop()
     prop__5.writeMicroseconds(pwm_5);
     prop__6.writeMicroseconds(pwm_6);
 
-  
   }
   }
   if (input_THROTTLE < 1000) {
@@ -311,10 +268,8 @@ void loop()
   pitch_pid_i =0;  
   yaw_pid_i = 0;
   }
-
- 
+ maintain_loop_time();
 }
-
 
 void blink() {
 
@@ -346,7 +301,7 @@ void blink() {
 
   ///////////////////////////////////////Channel 3
   
-  if (GPIOC_PDIR & 1) {//pin 15, D2                  pin D10 - B00000100
+  if (GPIOC_PDIR & 1) {//pin 15, D2               
     if (last_CH3_state == 0) {
       last_CH3_state = 1;
       counter_3 = current_count;
@@ -356,7 +311,6 @@ void blink() {
     last_CH3_state = 0;
     input_PITCH = current_count - counter_3;
   }
-
 
   ///////////////////////////////////////Channel 4
   if (GPIOD_PDIR & 2) { //pin 14
@@ -396,34 +350,6 @@ void stopAll() {
   prop__6.writeMicroseconds(pwm_6);
 }
 
-void Test_print() {
-  Serial.println("pwm_1 pwm_2 pwm_3 pwm_4 pwm_5 pwm_6");
-  Serial.print(pwm_1);
-  Serial.print("  -  ");
-  Serial.print(pwm_2);
-  Serial.print("  -  ");
-  Serial.print(pwm_3);
-  Serial.print("  -  ");
-  Serial.print(pwm_4);
-  Serial.print("  -  ");
-  Serial.print(pwm_5);
-  Serial.print("  -  ");
-  Serial.println(pwm_6);
-}
-
-/*
-void statePrint() {
-  Serial.print("roll: ");
-  Serial.print(roll);
-  Serial.print(" pitch: ");
-  Serial.print(pitch);
-  Serial.print(" yaw: ");
-  Serial.print(yaw);
-  Serial.print(" altitude");
-  Serial.print(altitude_val);
-  Serial.println();
-}
-*/
 void maintain_loop_time () {
   difference = micros() - main_loop_timer;
   while (difference < 5000) {
