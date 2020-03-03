@@ -21,8 +21,8 @@ UAV specs:
 
 
 Data processing tools used:
-- [Python](https://www.python.org/) 
-- [Processing](https://processing.org/) 
-- [Matlab](https://www.mathworks.com/) 
+- [Python](https://www.python.org/) used for extracting data.
+- [Processing](https://processing.org/) used for real-time data visualization.
+- [Matlab](https://www.mathworks.com/) used for simulation. 
 
 ****description comming at the end of this project: 26/6/2020***
