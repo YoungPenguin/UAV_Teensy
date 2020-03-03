@@ -132,16 +132,6 @@ void loop() {
   time = millis(); 
   elapsedTime = (time - timePrev) / 1000;
   //////////////////////////////////////Gyro read/////////////////////////////////////
-
-  Serial.print(input_THROTTLE);
-  Serial.print(" ");
-  Serial.print(input_ROLL);
-  Serial.print(" ");
-  Serial.print(input_PITCH);
-  Serial.print(" ");
-  Serial.print(input_YAW);
-  Serial.print(" ");
-  Serial.println();
   
   if (input_THROTTLE > 1100) {
     
@@ -241,10 +231,10 @@ void loop() {
   }
   if (input_THROTTLE < 1000) {
     Serial.println("Stop all");
-   stopAll();
-   roll_pid_i = 0; 
-  pitch_pid_i =0;  
-  yaw_pid_i = 0;
+    stopAll();
+    roll_pid_i = 0; 
+    pitch_pid_i =0;  
+    yaw_pid_i = 0;
   }
  maintain_loop_time();
 }
@@ -253,14 +243,12 @@ void blink() {
 
   current_count = micros();
   ///////////////////////////////////////Channel 1
-  if (GPIOB_PDIR & 2) { //pin 17 (1B 16)
-     
+  if (GPIOB_PDIR & 2) { //pin 17 (1B 16)   
     if (last_CH1_state == 0) {                         
       last_CH1_state = 1;        //Store the current state into the last state for the next loop
       counter_1 = current_count; //Set counter_1 to current value.
     }
-  }
-  else if (last_CH1_state == 1) {                           
+  } else if (last_CH1_state == 1) {                           
     last_CH1_state = 0;                     //Store the current state into the last state for the next loop
     input_THROTTLE = current_count - counter_1; //We make the time difference. Channel 1 is current_time - timer_1.
   }
@@ -271,8 +259,7 @@ void blink() {
       last_CH2_state = 1;
       counter_2 = current_count;
     }
-  }
-  else if (last_CH2_state == 1) {
+  } else if (last_CH2_state == 1) {
     last_CH2_state = 0;
     input_ROLL = current_count - counter_2;
   }
@@ -284,8 +271,7 @@ void blink() {
       last_CH3_state = 1;
       counter_3 = current_count;
     }
-  }
-  else if (last_CH3_state == 1) {
+  } else if (last_CH3_state == 1) {
     last_CH3_state = 0;
     input_PITCH = current_count - counter_3;
   }
@@ -296,8 +282,7 @@ void blink() {
       last_CH4_state = 1;
       counter_4 = current_count;
     }
-  }
-  else if (last_CH4_state == 1) {
+  } else if (last_CH4_state == 1) {
     last_CH4_state = 0;
     input_YAW = current_count - counter_4;
   }
