@@ -8,8 +8,6 @@
  *            (front)
  */
 
- //read angles and forces from gyroaccelerometer
-
 #include <Servo.h>
 #include <NXPMotionSense.h>
 #include <Wire.h>
@@ -35,28 +33,25 @@ int input_PITCH = 0;    // channel 3 of the receiver and pin D9 of arduino
 int input_ROLL = 0;     // channel 2 of the receiver and pin D8 of arduino
 int input_THROTTLE; // channel 1 of the receiver and pin D10 of arduino
 
-
-
 //Gyro Variables
 float elapsedTime, time, timePrev;        //Variables for time control
-
 
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz; 
 float roll, pitch, yaw, yaw_previous, yaw_difference;
-float total_yaw=0;
-
+float total_yaw = 0;
 
 //////////////////////////////PID FOR ROLL///////////////////////////
 float roll_PID, pwm_1, pwm_2, pwm_3, pwm_4, pwm_5, pwm_6, roll_error, roll_previous_error;
 float roll_pid_p = 0;
 float roll_pid_i = 0;
 float roll_pid_d = 0;
+
 ///////////////////////////////ROLL PID CONSTANTS////////////////////
-double roll_kp = 1.33;         //3.55
-double roll_ki = 0.043;       //0.003
-double roll_kd =36;//.2;         //2.05, 15
+double roll_kp = 1.33;       
+double roll_ki = 0.043;     
+double roll_kd =36;//.2;       
 float roll_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR PITCH//////////////////////////
@@ -65,9 +60,9 @@ float pitch_pid_p = 0;
 float pitch_pid_i = 0;
 float pitch_pid_d = 0;
 ///////////////////////////////PITCH PID CONSTANTS///////////////////
-double pitch_kp = 1.33;       //3.55
-double pitch_ki = 0.043;       //0.003
-double pitch_kd = 37;//.22;        //2.05
+double pitch_kp = 1.33;    
+double pitch_ki = 0.043;   
+double pitch_kd = 37;//.22;    
 float pitch_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR YAW//////////////////////////
@@ -76,13 +71,13 @@ float yaw_pid_p = 0;
 float yaw_pid_i = 0;
 float yaw_pid_d = 0;
 ///////////////////////////////YAW PID CONSTANTS///////////////////
-double yaw_kp = 7;       //3.55, 0.3, 150
-double yaw_ki = 0.05;       //0.003, 0.0, 200.5
-double yaw_kd = 10;//.22;        //2.05, 15.0, 100 
+double yaw_kp = 7;       
+double yaw_ki = 0.05;    
+double yaw_kd = 10;//.22;        
 float yaw_desired_angle = 0; //This is the angle in which we whant the
 float yaw_desired_angle_set = 0;
 
-float difference =0;
+float difference = 0;
 float main_loop_timer = 0;
 
 elapsedMillis MPL = 0;
@@ -92,12 +87,12 @@ void setup() {
   Serial.begin(9600);
 
   pinMode(14, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(14), blink, CHANGE);
   pinMode(15, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(15), blink, CHANGE);
   pinMode(16, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(16), blink, CHANGE);
   pinMode(17, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(14), blink, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(15), blink, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(16), blink, CHANGE);
   attachInterrupt(digitalPinToInterrupt(17), blink, CHANGE);
 
   DDRB |= B00100000;  //D13 as output
@@ -118,9 +113,7 @@ void setup() {
   prop__6.writeMicroseconds(1000);
 
 ////////////////////////////////////////////////////////////////////////////////////
-  
  
- //while(!Serial);
   imu.begin();
 
   filter.begin(100);
@@ -132,11 +125,7 @@ void setup() {
 
 
 }
-void loop()
-{
-  
-//float altitude_val;
-
+void loop() {
   
   /////////////////////////////I M U/////////////////////////////////////
   timePrev = time; 
@@ -156,42 +145,33 @@ void loop()
   
   if (input_THROTTLE > 1100) {
     
-  
   if(imu.available()){
-  imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
-    // Update the SensorFusion filter
-  filter.update(gx, gy, gz, ax, ay, az, mx, my, mz);
+   imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
+     // Update the SensorFusion filter
+   filter.update(gx, gy, gz, ax, ay, az, mx, my, mz);
 
-    // print the heading, pitch and roll
-  roll = -1*filter.getRoll();  
-  pitch = -1*(filter.getPitch()); 
-  yaw = filter.getYaw();
-   
-   if(MPL > 100){
-      //reading pressure causes a noticable delay as a result of
-      //switching between altimeter and barometer modes of the
-      //MPL3115.
-      imu.readAltitude();
-//      altitude_val = imu.altitudeM;
-      MPL = 0;
-      }
+     // print the heading, pitch and roll
+   roll = -1*filter.getRoll();  
+   pitch = -1*(filter.getPitch()); 
+   yaw = filter.getYaw();
 
-  yaw_difference = (yaw_previous - yaw);
+    if(MPL > 100){
+       imu.readAltitude();
+       MPL = 0;
+       }
 
-  yaw_previous = yaw;
-   
-  if(yaw_difference < -20)
-  {
-    yaw = 1;
+   yaw_difference = (yaw_previous - yaw);
+   yaw_previous = yaw;
+
+   if(yaw_difference < -20) {
+     yaw = 1;
   }
-  else if(yaw_difference > 20)
-  {
+  else if(yaw_difference > 20) {
     yaw = -1;
   }
   else {
     yaw = yaw_difference;
   }
-
   total_yaw += yaw;
 
   roll_desired_angle = map(input_ROLL, 1000, 2000, -10, 10);
@@ -201,8 +181,7 @@ void loop()
   
   yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
 
-  /*///////////////////////////P I D///////////////////////////////////*/
-  
+  /*///////////////////////////P I D///////////////////////////////////*/  
   roll_error = roll - roll_desired_angle;
   pitch_error = pitch - pitch_desired_angle;
   yaw_error = total_yaw - yaw_desired_angle;
@@ -258,7 +237,6 @@ void loop()
     prop__4.writeMicroseconds(pwm_4);
     prop__5.writeMicroseconds(pwm_5);
     prop__6.writeMicroseconds(pwm_6);
-
   }
   }
   if (input_THROTTLE < 1000) {
