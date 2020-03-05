@@ -7,7 +7,7 @@
  *         1-cw  6-ccw
  *            (front)
  */
-
+char my_str[] = "hexacopter in x configuration";
 #include <Servo.h>
 #include <NXPMotionSense.h>
 #include <Wire.h>
@@ -17,6 +17,8 @@
 NXPMotionSense imu;
 NXPSensorFusion filter;
 
+
+// define the number of rotors
 Servo prop__1;
 Servo prop__2;
 Servo prop__3;
@@ -32,6 +34,7 @@ int input_YAW = 0;      // channel 4 of the receiver and pin D12 of arduino
 int input_PITCH = 0;    // channel 3 of the receiver and pin D9 of arduino
 int input_ROLL = 0;     // channel 2 of the receiver and pin D8 of arduino
 int input_THROTTLE; // channel 1 of the receiver and pin D10 of arduino
+int done = 0;
 
 //Gyro Variables
 float elapsedTime, time, timePrev;        //Variables for time control
@@ -86,6 +89,8 @@ void setup() {
 
   Serial.begin(9600);
 
+  
+  // define the input pins for the rc transmitter and setup interrupt
   pinMode(14, INPUT_PULLUP);
   pinMode(15, INPUT_PULLUP);
   pinMode(16, INPUT_PULLUP);
@@ -95,16 +100,18 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(16), blink, CHANGE);
   attachInterrupt(digitalPinToInterrupt(17), blink, CHANGE);
 
+  // just a state led you can leave it out
   DDRB |= B00100000;  //D13 as output
   PORTB &= B11011111; //D13 set to LOW
 
+  
+  // attach the motors and puls 
   prop__1.attach(3);
   prop__2.attach(7);
   prop__3.attach(6);
   prop__4.attach(4);
   prop__5.attach(5);
   prop__6.attach(2);
-
   prop__1.writeMicroseconds(1000);
   prop__2.writeMicroseconds(1000);
   prop__3.writeMicroseconds(1000);
@@ -113,9 +120,8 @@ void setup() {
   prop__6.writeMicroseconds(1000);
 
 ////////////////////////////////////////////////////////////////////////////////////
- 
+  // read sensors from prop shield
   imu.begin();
-
   filter.begin(100);
 
   //sets local sea level pressure
@@ -123,6 +129,61 @@ void setup() {
   //     https://aviationweather.gov/metar
   imu.setSeaPressure(98900);
 
+  
+  /*
+  
+  Setup "GUI"
+  
+  */
+ 
+  Serial.print("You have defined a ")
+  Serial.println(my_str);
+  Serial.println("Press Y and Enter to confirm and continue");
+  while(done == 0)
+  {
+while (Serial.available > 0)
+{
+if (Serial.read == 'Y')
+{
+done = 1;
+}
+}
+  }
+// now we clear the serial buffer.
+while(Serial.available() > 0)
+  {
+byte dummyread = Serial.read();
+  }
+  
+  
+  Serial.print("Did you remember to calibrate the sensors and place the sensor in the right direction?")
+  Serial.println("Press Y and Enter to confirm and continue");
+  while(done == 0)
+  {
+while (Serial.available > 0)
+{
+if (Serial.read == 'Y')
+{
+done = 1;
+}
+}
+  }
+// now we clear the serial buffer.
+while(Serial.available() > 0)
+  {
+byte dummyread = Serial.read();
+  }  
+  
+  
+Serial.println("It looks like your all set")
+Serial.println("Have fun flying");  
+  
+  
+  /*
+  
+  Setup "GUI"
+  
+  */  
 
 }
 void loop() {
