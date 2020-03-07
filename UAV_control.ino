@@ -7,7 +7,7 @@
  *         1-cw  6-ccw
  *            (front)
  */
-char my_str[] = "hexacopter in x configuration";
+
 #include <Servo.h>
 #include <NXPMotionSense.h>
 #include <Wire.h>
@@ -16,6 +16,21 @@ char my_str[] = "hexacopter in x configuration";
 
 NXPMotionSense imu;
 NXPSensorFusion filter;
+
+
+
+bool Hexcopter = true;
+bool Quad_X = false;
+bool Quad_PLUS = false;
+
+
+if(Hexcopter){
+   char my_str[] = "hexacopter in x configuration";
+}else if (Quad_X){
+   char my_str[] = "quadcopter in x configuration";
+}else if (Quad_PLUS){
+   char my_str[] = "quadcopter in + configuration";
+}
 
 
 // define the number of rotors
@@ -268,13 +283,34 @@ void loop() {
   yaw_PID = anti_windup(yaw_PID, -400, 400);
 
   /* hex-x config */
+    
+    
+  if(Hexcopter == true){
   pwm_1 = input_THROTTLE - roll_PID - 1.732 * pitch_PID - yaw_PID;
   pwm_2 = input_THROTTLE - 1 / 2 * roll_PID + yaw_PID;
   pwm_3 = input_THROTTLE - roll_PID + 1.732 * pitch_PID - yaw_PID;
   pwm_4 = input_THROTTLE + roll_PID + 1.732 * pitch_PID + yaw_PID;
   pwm_5 = input_THROTTLE + 1 / 2 * roll_PID - yaw_PID;
   pwm_6 = input_THROTTLE + roll_PID - 1.732 * pitch_PID + yaw_PID; // roll, pitch, yaw
-  
+  }
+        
+ if(Quad_X == true){
+  pwm_1 = input_THROTTLE - roll_PID + pitch_PID - yaw_PID;
+  pwm_2 = input_THROTTLE - roll_PID - pitch_PID + yaw_PID;
+  pwm_3 = input_THROTTLE + roll_PID + pitch_PID + yaw_PID;
+  pwm_4 = input_THROTTLE + roll_PID - pitch_PID - yaw_PID;
+
+  }
+if(Quad_PLUS == true){
+  pwm_1 = input_THROTTLE  + pitch_PID - yaw_PID;
+  pwm_2 = input_THROTTLE - roll_PID  + yaw_PID;
+  pwm_3 = input_THROTTLE  + pitch_PID + yaw_PID;
+  pwm_4 = input_THROTTLE + roll_PID  - yaw_PID;
+
+  }
+    
+    
+    
   pwm_1 = anti_windup(pwm_1, 1000, 2000);
   pwm_2 = anti_windup(pwm_2, 1000, 2000);
   pwm_3 = anti_windup(pwm_3, 1000, 2000);
