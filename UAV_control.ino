@@ -8,6 +8,16 @@
  *            (front)
  */
 
+
+bool Hexcopter = true;
+bool Quad_X = false;
+bool Quad_PLUS = false;
+
+// If you want more options you need to define 
+// 1. extra motors
+// 2. motor mix algo
+
+
 #include <Servo.h>
 #include <NXPMotionSense.h>
 #include <Wire.h>
@@ -16,13 +26,6 @@
 
 NXPMotionSense imu;
 NXPSensorFusion filter;
-
-
-
-bool Hexcopter = true;
-bool Quad_X = false;
-bool Quad_PLUS = false;
-
 
 if(Hexcopter){
    char my_str[] = "hexacopter in x configuration";
