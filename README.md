@@ -30,4 +30,10 @@ Data processing tools used:
 - [Processing](https://processing.org/) used for real-time data visualization.
 - [Matlab](https://www.mathworks.com/) used for simulation. 
 
+# Licence
+Using this code is **completely at your own risk!!!**
+This is an open source project so you can use it as you please.
+
+If you want to use this software please "fork" and "star" this project to make sure your version doesn't change and to show your support to the creators of this project. Enjoy
+
 ****description comming at the end of this project: 26/6/2020***
