@@ -14,13 +14,12 @@ bool Quad_X = false;
 bool Quad_PLUS = false;
 
 // If you want more options you need to define 
-// 1. extra motors
-// 2. motor mix algo
+// 1. motor mix algo
+// (2). (extra motors)
 
 
 #include <Servo.h>
 #include <NXPMotionSense.h>
-#include <Wire.h>
 #include <EEPROM.h>
 #include <util/crc16.h>
 
@@ -34,9 +33,8 @@ if(Hexcopter){
 }else if (Quad_PLUS){
    char my_str[] = "quadcopter in + configuration";
 }
-
-
 // define the number of rotors
+
 Servo prop__1;
 Servo prop__2;
 Servo prop__3;
@@ -70,10 +68,10 @@ float roll_pid_i = 0;
 float roll_pid_d = 0;
 
 ///////////////////////////////ROLL PID CONSTANTS////////////////////
-double roll_kp = 1.33;       
-double roll_ki = 0.043;     
-double roll_kd =36;//.2;       
-float roll_desired_angle = 0; //This is the angle in which we whant the
+float roll_kp = 1.33;       
+float roll_ki = 0.043;     
+float roll_kd =36;//.2;       
+float roll_desired_angle = 0; //This is the angle we want in roll (y-axies)
 
 //////////////////////////////PID FOR PITCH//////////////////////////
 float pitch_PID, pitch_error, pitch_previous_error;
@@ -81,9 +79,9 @@ float pitch_pid_p = 0;
 float pitch_pid_i = 0;
 float pitch_pid_d = 0;
 ///////////////////////////////PITCH PID CONSTANTS///////////////////
-double pitch_kp = 1.33;    
-double pitch_ki = 0.043;   
-double pitch_kd = 37;//.22;    
+float pitch_kp = 1.33;    
+float pitch_ki = 0.043;   
+float pitch_kd = 37;//.22;    
 float pitch_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR YAW//////////////////////////
@@ -92,9 +90,9 @@ float yaw_pid_p = 0;
 float yaw_pid_i = 0;
 float yaw_pid_d = 0;
 ///////////////////////////////YAW PID CONSTANTS///////////////////
-double yaw_kp = 7;       
-double yaw_ki = 0.05;    
-double yaw_kd = 10;//.22;        
+float yaw_kp = 7;       
+float yaw_ki = 0.05;    
+float yaw_kd = 10;//.22;        
 float yaw_desired_angle = 0; //This is the angle in which we whant the
 float yaw_desired_angle_set = 0;
 
@@ -149,10 +147,8 @@ void setup() {
 
   
   /*
-  
-  Setup "GUI"
-  
-  */
+  Setup "GUI" 
+  *****************************************************************/
  
   Serial.print("You have defined a ")
   Serial.println(my_str);
@@ -172,8 +168,6 @@ while(Serial.available() > 0)
   {
 byte dummyread = Serial.read();
   }
-  
-  
   Serial.print("Did you remember to calibrate the sensors and place the sensor in the right direction?")
   Serial.println("Press Y and Enter to confirm and continue");
   while(done == 0)
@@ -197,16 +191,14 @@ Serial.println("It looks like your all set")
 Serial.println("Have fun flying");  
   
   
-  /*
-  
+  /*********************************************************
   Setup "GUI"
-  
   */  
 
 }
 void loop() {
   
-  /////////////////////////////I M U/////////////////////////////////////
+  ///////////////////////////// I M U /////////////////////////////////////
   timePrev = time; 
   time = millis(); 
   elapsedTime = (time - timePrev) / 1000;
@@ -271,9 +263,9 @@ void loop() {
   pitch_pid_d = pitch_kd * ((pitch_error - pitch_previous_error));
   yaw_pid_d = yaw_kd * ((yaw_error - yaw_previous_error));
 
-  roll_PID = roll_kp * roll_error + roll_pid_i + roll_kd * ((roll_error - roll_previous_error) );
-  pitch_PID = pitch_kp * pitch_error + pitch_pid_i + pitch_kd * ((pitch_error - pitch_previous_error));
-  yaw_PID = yaw_kp * yaw_error + yaw_pid_i + yaw_kd * ((yaw_error - yaw_previous_error));
+  roll_PID  = roll_pid_p + roll_pid_i +  roll_pid_d;
+  pitch_PID = pitch_pid_p + pitch_pid_i + pitch_pid_d ;
+  yaw_PID   = yaw_pid_p + yaw_pid_i +  yaw_pid_d;
 
    pitch_previous_error = pitch_error; 
    roll_previous_error = roll_error;
@@ -285,34 +277,36 @@ void loop() {
   pitch_PID = anti_windup(pitch_PID, -400, 400);
   yaw_PID = anti_windup(yaw_PID, -400, 400);
 
-  /* hex-x config */
-    
-    
-  if(Hexcopter == true){
+  /* 
+  
+  Please choose your configuration in the top, 
+  and if the configuration are missing just set it up
+  
+  */
+        
+  if(Hexcopter){
   pwm_1 = input_THROTTLE - roll_PID - 1.732 * pitch_PID - yaw_PID;
   pwm_2 = input_THROTTLE - 1 / 2 * roll_PID + yaw_PID;
   pwm_3 = input_THROTTLE - roll_PID + 1.732 * pitch_PID - yaw_PID;
   pwm_4 = input_THROTTLE + roll_PID + 1.732 * pitch_PID + yaw_PID;
   pwm_5 = input_THROTTLE + 1 / 2 * roll_PID - yaw_PID;
-  pwm_6 = input_THROTTLE + roll_PID - 1.732 * pitch_PID + yaw_PID; // roll, pitch, yaw
+  pwm_6 = input_THROTTLE + roll_PID - 1.732 * pitch_PID + yaw_PID; 
   }
         
- if(Quad_X == true){
+if(Quad_X){
   pwm_1 = input_THROTTLE - roll_PID + pitch_PID - yaw_PID;
   pwm_2 = input_THROTTLE - roll_PID - pitch_PID + yaw_PID;
   pwm_3 = input_THROTTLE + roll_PID + pitch_PID + yaw_PID;
   pwm_4 = input_THROTTLE + roll_PID - pitch_PID - yaw_PID;
 
   }
-if(Quad_PLUS == true){
+if(Quad_PLUS){
   pwm_1 = input_THROTTLE  + pitch_PID - yaw_PID;
   pwm_2 = input_THROTTLE - roll_PID  + yaw_PID;
   pwm_3 = input_THROTTLE  + pitch_PID + yaw_PID;
   pwm_4 = input_THROTTLE + roll_PID  - yaw_PID;
 
-  }
-    
-    
+  }  
     
   pwm_1 = anti_windup(pwm_1, 1000, 2000);
   pwm_2 = anti_windup(pwm_2, 1000, 2000);
@@ -336,21 +330,21 @@ if(Quad_PLUS == true){
     pitch_pid_i =0;  
     yaw_pid_i = 0;
   }
- maintain_loop_time();
+ maintain_loop_time(); // make sure the loop is always at 1ms 
 }
 
 void blink() {
 
   current_count = micros();
   ///////////////////////////////////////Channel 1
-  if (GPIOB_PDIR & 2) { //pin 17 (1B 16)   
+  if (GPIOB_PDIR & 2) { //pin 17   
     if (last_CH1_state == 0) {                         
-      last_CH1_state = 1;        //Store the current state into the last state for the next loop
-      counter_1 = current_count; //Set counter_1 to current value.
+      last_CH1_state = 1;        
+      counter_1 = current_count; 
     }
   } else if (last_CH1_state == 1) {                           
-    last_CH1_state = 0;                     //Store the current state into the last state for the next loop
-    input_THROTTLE = current_count - counter_1; //We make the time difference. Channel 1 is current_time - timer_1.
+    last_CH1_state = 0;                   
+    input_THROTTLE = current_count - counter_1; 
   }
 
   ///////////////////////////////////////Channel 2
@@ -366,7 +360,7 @@ void blink() {
 
   ///////////////////////////////////////Channel 3
   
-  if (GPIOC_PDIR & 1) {//pin 15, D2               
+  if (GPIOC_PDIR & 1) {//pin 15              
     if (last_CH3_state == 0) {
       last_CH3_state = 1;
       counter_3 = current_count;
@@ -415,9 +409,8 @@ void stopAll() {
 
 void maintain_loop_time () {
   difference = micros() - main_loop_timer;
-  while (difference < 5000) {
+  while (difference < 1000) { // make sure the loop runs at 1ms all the time
     difference = micros() - main_loop_timer;
   }
-  //Serial.println(difference);
   main_loop_timer = micros();
 }
