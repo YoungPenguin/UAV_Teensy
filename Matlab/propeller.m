@@ -14,6 +14,8 @@ Ra = RaVolt/11; % ankermodstand ved 11A
 Ktrust = (0.6 * 9.8)/(11200 / 60 * 2 * pi); % trust i Newton
 % drag ved 11200 RPM
 KDrag = 11 * Km / (11200 / 60 * 2 * pi);
+% done
+
 
 
 
