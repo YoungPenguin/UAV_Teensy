@@ -8,7 +8,6 @@
  *            (front)
  */
 
-
 bool Hexcopter = true;
 bool Quad_X = false;
 bool Quad_PLUS = false;
