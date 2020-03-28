@@ -1,4 +1,9 @@
 # UAV_Teensy
+# Covid-19 update 28/03/2020
+Due to Covid-19, this project will be carried out on a more theoretical level than initially expected. So if you want to use this controller for your own project, then you will have to wait a little longer for controller confirmation.
+
+****description comming at the end of this project: 26/6/2020***
+
 ***IMPORTANT!!!***
  - ***Make sure all inputs and sensors are set in the same direction as the code is written***
  - ***TAKE YOUR F''''' PROPELLERS OFF!***
@@ -36,4 +41,4 @@ This is an open source project so you can use it as you please.
 
 If you want to use this software please "fork" and "star" this project to make sure your version doesn't change and to show your support to the creators of this project. Enjoy
 
-****description comming at the end of this project: 26/6/2020***
+
