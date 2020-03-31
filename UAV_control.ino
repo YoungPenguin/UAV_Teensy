@@ -23,7 +23,7 @@ bool Quad_PLUS = false;
 #include <util/crc16.h>
 
 NXPMotionSense imu;
-NXPSensorFusion filter;
+Madgwick filter;
 
 if(Hexcopter){
    char my_str[] = "hexacopter in x configuration";
