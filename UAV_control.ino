@@ -16,12 +16,11 @@
 #include <EEPROM.h>
 #include <MadgwickAHRS.h>
 #include "Filter.h"
-
 #include <util/crc16.h>
 
-ExponentialFilter<float> FilteredTemperatureWeight5(10, 0);
-ExponentialFilter<float> FilteredTemperatureWeight10(10, 0);
-ExponentialFilter<float> FilteredTemperatureWeight15(15, 0);
+//ExponentialFilter<float> FilteredTemperatureWeight5(10, 0);
+//ExponentialFilter<float> FilteredTemperatureWeight10(10, 0);
+//ExponentialFilter<float> FilteredTemperatureWeight15(10, 0);
 
 
 NXPMotionSense imu;
@@ -53,6 +52,7 @@ float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz; 
 float roll, pitch, yaw, yaw_previous, yaw_difference;
+float roll_smooth, pitch_smooth, yaw_smooth;
 float total_yaw=0;
 float loop_time; //sæt med ordentlig test
 
@@ -67,9 +67,9 @@ float roll_pid_p = 0;
 float roll_pid_i = 0;
 float roll_pid_d = 0;
 ///////////////////////////////ROLL PID CONSTANTS////////////////////
-float roll_kp = 1.33;         //3.55
-float roll_ki = 0.043;       //0.003
-float roll_kd =32;//.2;         //2.05, 15, 36
+float roll_kp = 1.20;         //3.55
+float roll_ki = 0.038;       //0.003
+float roll_kd =29;//.2;         //2.05, 15, 36
 float roll_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR PITCH//////////////////////////
@@ -140,6 +140,8 @@ void setup() {
 
  // imu.setSeaPressure(98900);
 
+
+
 }
 void loop()
 {
@@ -153,15 +155,24 @@ void loop()
   elapsedTime = (time - timePrev) / 1000;
   //////////////////////////////////////Gyro read/////////////////////////////////////
 
+  
   //if((input_THROTTLE < 1000)   
+/*
+  Serial.print("throttle = ");
+  Serial.print(input_THROTTLE);
+  Serial.print(", roll = ");
+  Serial.print(input_ROLL);
+  Serial.print(", pitch = ");
+   Serial.print(input_PITCH);
+  Serial.print(", yaw = ");
+   Serial.println(input_YAW);
+  */
+
+  
   
   if (input_THROTTLE > 1100) {  //(start==1)
 
-  if(first_time==0)
-  {
-    Serial.print("Throttle up ");
-    first_time=1;
-  }
+  
     
  // time_val=micros();
   
@@ -172,30 +183,30 @@ void loop()
     // Update the SensorFusion filter
     filter.updateIMU(gx, gy, gz, ax, ay, az);
 
-    ax = ax - 0.0499;
-    ay = ay - 0.0596;
-    az = az- 0.0288;
-    gx = gx +0.7289;
-    gy = gy - 1.1380;
-    gz = gz - 0.2502;
+    
 
-  roll = filter.getRoll();
-    pitch = filter.getPitch();
+  roll = -1* filter.getRoll();
+    pitch = -1* filter.getPitch();
         yaw = filter.getYaw();
 
   
-
-  roll = roll+2.1564;
-  pitch = pitch+5.0419-0.1;
-
-  FilteredTemperatureWeight5.Filter(roll);
-  roll = FilteredTemperatureWeight5.Current();
   
-  FilteredTemperatureWeight10.Filter(pitch);
-  pitch = FilteredTemperatureWeight10.Current();
+
+  roll = roll-2.2;
+  pitch = pitch-2.74;
+
   
-  FilteredTemperatureWeight15.Filter(yaw);
-  yaw = FilteredTemperatureWeight15.Current();
+
+  //FilteredTemperatureWeight5.Filter(roll);
+  //roll_smooth = FilteredTemperatureWeight5.Current();
+  // +0.04 -4.00 
+
+  
+//  FilteredTemperatureWeight10.Filter(pitch);
+//  pitch_smooth = FilteredTemperatureWeight10.Current();
+  
+ // FilteredTemperatureWeight15.Filter(yaw);
+ // yaw_smooth = FilteredTemperatureWeight15.Current();
   
   yaw_difference = (yaw_previous - yaw);
   yaw_previous = yaw;
@@ -213,14 +224,14 @@ void loop()
   }
   total_yaw += yaw;
 
+    
+ 
+  
   roll_desired_angle = map(input_ROLL, 1000, 2000, -10, 10);
   pitch_desired_angle = map(input_PITCH, 1000, 2000, -10, 10);
   yaw_desired_angle_set = map(input_YAW, 1000, 2000, -2, 2);
   yaw_desired_angle_set = yaw_desired_angle_set/10;
   yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
-
-
- 
   
   
   /*///////////////////////////P I D///////////////////////////////////*/  
@@ -228,30 +239,24 @@ void loop()
   pitch_error = pitch - pitch_desired_angle;
   yaw_error = total_yaw - yaw_desired_angle;
 
-  roll_pid_p = roll_kp * roll_error;
-  pitch_pid_p = pitch_kp * pitch_error;
-  yaw_pid_p = yaw_kp * yaw_error;
-
   roll_pid_i += (roll_ki*roll_error); 
   pitch_pid_i += (pitch_ki*pitch_error);  
   yaw_pid_i += (yaw_ki*yaw_error);
   
-  roll_pid_i =anti_windup(roll_pid_i, -400, 400);
-  pitch_pid_i =anti_windup(pitch_pid_i, -400, 400);
-  yaw_pid_i =anti_windup(yaw_pid_i, -400, 400);
+  roll_pid_i =anti_windup(roll_pid_i, -200, 200);
+  pitch_pid_i =anti_windup(pitch_pid_i, -200, 200);
+  yaw_pid_i =anti_windup(yaw_pid_i, -200, 200);
 
-  roll_pid_d = roll_kd * ((roll_error - roll_previous_error) );
-  pitch_pid_d = pitch_kd * ((pitch_error - pitch_previous_error));
-  yaw_pid_d = yaw_kd * ((yaw_error - yaw_previous_error));
-
-  roll_PID = roll_pid_p + roll_pid_i + roll_pid_d;
-  pitch_PID = pitch_pid_p+ pitch_pid_i + pitch_pid_d;
-  yaw_PID = yaw_pid_p + yaw_pid_i + yaw_pid_d;
+ 
+  roll_PID = roll_kp * roll_error + roll_pid_i + roll_kd * ((roll_error - roll_previous_error) );
+  pitch_PID = pitch_kp * pitch_error + pitch_pid_i + pitch_kd * ((pitch_error - pitch_previous_error));
+  yaw_PID = yaw_kp * yaw_error + yaw_pid_i + yaw_kd * ((yaw_error - yaw_previous_error));
 
    pitch_previous_error = pitch_error; 
    roll_previous_error = roll_error;
    yaw_previous_error = yaw_error;
-  
+
+ 
 
   /*///////////////////////////P I D///////////////////////////////////*/
   roll_PID = anti_windup(roll_PID, -400, 400);
@@ -287,14 +292,13 @@ void loop()
 
   
   pwm_1 = input_THROTTLE - roll_PID - 1.732 * pitch_PID - yaw_PID;
-  pwm_2 = input_THROTTLE - 1 / 2 * roll_PID + yaw_PID;
+  pwm_2 = input_THROTTLE - 0.5 * roll_PID + yaw_PID;
   pwm_3 = input_THROTTLE - roll_PID + 1.732 * pitch_PID - yaw_PID;
   pwm_4 = input_THROTTLE + roll_PID + 1.732 * pitch_PID + yaw_PID;
-  pwm_5 = input_THROTTLE + 1 / 2 * roll_PID - yaw_PID;
+  pwm_5 = input_THROTTLE + 0.5 * roll_PID - yaw_PID;
   pwm_6 = input_THROTTLE + roll_PID - 1.732 * pitch_PID + yaw_PID; // roll, pitch, yaw
 
  
-  
   pwm_1 = anti_windup(pwm_1, 1000, 2000);
   pwm_2 = anti_windup(pwm_2, 1000, 2000);
   pwm_3 = anti_windup(pwm_3, 1000, 2000);
@@ -312,17 +316,31 @@ void loop()
     prop__5.writeMicroseconds(pwm_5);
     prop__6.writeMicroseconds(pwm_6);
 
+
+
+  
+  //Serial.println(roll_smooth);
+
+ // Test_print();
+  statePrint();
+  
+//print
+
+//
+
+  
+  //Test_print();
   
   } //imu available ends here
   }
   if (input_THROTTLE < 1000) {
-    Serial.println("Stop all");
+ //   Serial.println("Stop all");
    stopAll();
   roll_pid_i = 0; 
   pitch_pid_i =0;  
   yaw_pid_i = 0;
   }
-  maintain_loop_time();
+ // maintain_loop_time();
 }
 
 
@@ -352,6 +370,7 @@ void blink() {
   else if (last_CH2_state == 1) {
     last_CH2_state = 0;
     input_ROLL = current_count - counter_2;
+     input_ROLL = input_ROLL -100;
   }
 
   ///////////////////////////////////////Channel 3
@@ -365,6 +384,7 @@ void blink() {
   else if (last_CH3_state == 1) {
     last_CH3_state = 0;
     input_PITCH = current_count - counter_3;
+     input_PITCH = input_PITCH -122;
   }
 
 
@@ -407,7 +427,8 @@ void stopAll() {
 }
 
 void Test_print() {
-  Serial.println("pwm_1 pwm_2 pwm_3 pwm_4 pwm_5 pwm_6");
+ // Serial.println("pwm_1 pwm_2 pwm_3 pwm_4 pwm_5 pwm_6");
+  Serial.print(" motor ");
   Serial.print(pwm_1);
   Serial.print("  -  ");
   Serial.print(pwm_2);
@@ -418,18 +439,46 @@ void Test_print() {
   Serial.print("  -  ");
   Serial.print(pwm_5);
   Serial.print("  -  ");
-  Serial.println(pwm_6);
+  Serial.print(pwm_6);
+  Serial.print(" yaw = ");
+  Serial.println(yaw);
 }
 
 
 void statePrint() { 
   //roll,pitch,yaw
-  //Serial.print("roll: ");
+  //Serial.print("roll: "); //time, roll_real, pitch_real, yaw_real, roll_desired, pitch_desired, yaw_desired, roll_PID, pitch_PID, yaw_PID, pwm_1, pwm_2, pwm_3, pwm_4, pwm_5, pwm_6
+  Serial.print(millis());
+  Serial.print(",");
   Serial.print(roll);
   Serial.print(",");
   Serial.print(pitch);
   Serial.print(",");
   Serial.print(yaw);
+  Serial.print(",");
+  Serial.print(roll_desired_angle);
+  Serial.print(",");
+  Serial.print(pitch_desired_angle);
+  Serial.print(",");
+  Serial.print(yaw_desired_angle);
+  Serial.print(",");
+  Serial.print(roll_PID);
+  Serial.print(",");
+  Serial.print(pitch_PID);
+  Serial.print(",");
+  Serial.print(yaw_PID);
+  Serial.print(",");
+  Serial.print(pwm_1);
+  Serial.print(",");
+  Serial.print(pwm_2);
+  Serial.print(",");
+  Serial.print(pwm_3);
+  Serial.print(",");
+  Serial.print(pwm_4);
+  Serial.print(",");
+  Serial.print(pwm_5);
+  Serial.print(",");
+  Serial.print(pwm_6);
 /*  Serial.print(" altitude");
   Serial.print(altitude_val);
   */
@@ -445,6 +494,7 @@ void maintain_loop_time () {
   }
   if(first_time==1)
   {
+    /*
   Serial.print(ax);
   Serial.print(" ");
   Serial.print(pitch_PID);
@@ -452,6 +502,7 @@ void maintain_loop_time () {
   Serial.print(micros());
   Serial.print(" ");
   Serial.println();
+  */
   }
   
   //Serial.println(" loop slower than 1 ms ");
