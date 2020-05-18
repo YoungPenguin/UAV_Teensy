@@ -18,11 +18,6 @@
 #include "Filter.h"
 #include <util/crc16.h>
 
-//ExponentialFilter<float> FilteredTemperatureWeight5(10, 0);
-//ExponentialFilter<float> FilteredTemperatureWeight10(10, 0);
-//ExponentialFilter<float> FilteredTemperatureWeight15(10, 0);
-
-
 NXPMotionSense imu;
 Madgwick filter;
 
@@ -42,12 +37,8 @@ int input_PITCH = 0;    // channel 3 of the receiver and pin D9 of arduino
 int input_ROLL = 0;     // channel 2 of the receiver and pin D8 of arduino
 int input_THROTTLE; // channel 1 of the receiver and pin D10 of arduino
 
-
-
 //Gyro Variables
 float elapsedTime, time, timePrev;        //Variables for time control
-
-
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz; 
@@ -56,10 +47,7 @@ float roll_smooth, pitch_smooth, yaw_smooth;
 float total_yaw=0;
 float loop_time; //sæt med ordentlig test
 
-
-
 bool first_time=0;
-
 
 //////////////////////////////PID FOR ROLL///////////////////////////
 float roll_PID, pwm_1, pwm_2, pwm_3, pwm_4, pwm_5, pwm_6, roll_error, roll_previous_error;
@@ -132,48 +120,21 @@ void setup() {
 
 ////////////////////////////////////////////////////////////////////////////////////
   
- 
  //while(!Serial);
   imu.begin();
-
   filter.begin(100);
-
- // imu.setSeaPressure(98900);
-
-
-
 }
 void loop()
 {
   
 //float altitude_val;
-
-  
   /////////////////////////////I M U/////////////////////////////////////
   timePrev = time; 
   time = millis(); 
   elapsedTime = (time - timePrev) / 1000;
   //////////////////////////////////////Gyro read/////////////////////////////////////
-
-  
-  //if((input_THROTTLE < 1000)   
-/*
-  Serial.print("throttle = ");
-  Serial.print(input_THROTTLE);
-  Serial.print(", roll = ");
-  Serial.print(input_ROLL);
-  Serial.print(", pitch = ");
-   Serial.print(input_PITCH);
-  Serial.print(", yaw = ");
-   Serial.println(input_YAW);
-  */
-
-  
   
   if (input_THROTTLE > 1100) {  //(start==1)
-
-  
-    
  // time_val=micros();
   
  if (imu.available()) {
@@ -183,31 +144,13 @@ void loop()
     // Update the SensorFusion filter
     filter.updateIMU(gx, gy, gz, ax, ay, az);
 
-    
-
-  roll = -1* filter.getRoll();
-    pitch = -1* filter.getPitch();
-        yaw = filter.getYaw();
-
-  
-  
+  roll  = -1* filter.getRoll(); // the -1 is just cos of our sensor placement **** properly not the same for you ****
+  pitch = -1* filter.getPitch();
+  yaw   = filter.getYaw();
 
   roll = roll-2.2;
   pitch = pitch-2.74;
 
-  
-
-  //FilteredTemperatureWeight5.Filter(roll);
-  //roll_smooth = FilteredTemperatureWeight5.Current();
-  // +0.04 -4.00 
-
-  
-//  FilteredTemperatureWeight10.Filter(pitch);
-//  pitch_smooth = FilteredTemperatureWeight10.Current();
-  
- // FilteredTemperatureWeight15.Filter(yaw);
- // yaw_smooth = FilteredTemperatureWeight15.Current();
-  
   yaw_difference = (yaw_previous - yaw);
   yaw_previous = yaw;
    
@@ -223,16 +166,12 @@ void loop()
     yaw = yaw_difference;
   }
   total_yaw += yaw;
-
-    
- 
   
   roll_desired_angle = map(input_ROLL, 1000, 2000, -10, 10);
   pitch_desired_angle = map(input_PITCH, 1000, 2000, -10, 10);
   yaw_desired_angle_set = map(input_YAW, 1000, 2000, -2, 2);
   yaw_desired_angle_set = yaw_desired_angle_set/10;
   yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
-  
   
   /*///////////////////////////P I D///////////////////////////////////*/  
   roll_error = roll - roll_desired_angle;
@@ -247,7 +186,6 @@ void loop()
   pitch_pid_i =anti_windup(pitch_pid_i, -200, 200);
   yaw_pid_i =anti_windup(yaw_pid_i, -200, 200);
 
- 
   roll_PID = roll_kp * roll_error + roll_pid_i + roll_kd * ((roll_error - roll_previous_error) );
   pitch_PID = pitch_kp * pitch_error + pitch_pid_i + pitch_kd * ((pitch_error - pitch_previous_error));
   yaw_PID = yaw_kp * yaw_error + yaw_pid_i + yaw_kd * ((yaw_error - yaw_previous_error));
@@ -255,42 +193,12 @@ void loop()
    pitch_previous_error = pitch_error; 
    roll_previous_error = roll_error;
    yaw_previous_error = yaw_error;
-
- 
-
+  
   /*///////////////////////////P I D///////////////////////////////////*/
   roll_PID = anti_windup(roll_PID, -400, 400);
   pitch_PID = anti_windup(pitch_PID, -400, 400);
   yaw_PID = anti_windup(yaw_PID, -400, 400);
-
-
-  
  
-
- 
-  //højre kp
-  //vinkel
-  //input
-  //output
-  //failsafe ved manglende input
-  //startup switch (mekanisme)
-  //intervaltimer.h
-  //1 ms loop time
-  //pid outputs
-
-
-  //overføringsfunktion
- //lavt og højt 
- //lavpass
- //serie, lead(tilbage)
- 
-  /* hex-x config */
-  //all inputs except throttle and pitch 0
-
-  
-
-
-  
   pwm_1 = input_THROTTLE - roll_PID - 1.732 * pitch_PID - yaw_PID;
   pwm_2 = input_THROTTLE - 0.5 * roll_PID + yaw_PID;
   pwm_3 = input_THROTTLE - roll_PID + 1.732 * pitch_PID - yaw_PID;
@@ -298,16 +206,12 @@ void loop()
   pwm_5 = input_THROTTLE + 0.5 * roll_PID - yaw_PID;
   pwm_6 = input_THROTTLE + roll_PID - 1.732 * pitch_PID + yaw_PID; // roll, pitch, yaw
 
- 
   pwm_1 = anti_windup(pwm_1, 1000, 2000);
   pwm_2 = anti_windup(pwm_2, 1000, 2000);
   pwm_3 = anti_windup(pwm_3, 1000, 2000);
   pwm_4 = anti_windup(pwm_4, 1000, 2000);
   pwm_5 = anti_windup(pwm_5, 1000, 2000);
   pwm_6 = anti_windup(pwm_6, 1000, 2000);
-
-  
-  
 
     prop__1.writeMicroseconds(pwm_1);
     prop__2.writeMicroseconds(pwm_2);
@@ -316,20 +220,8 @@ void loop()
     prop__5.writeMicroseconds(pwm_5);
     prop__6.writeMicroseconds(pwm_6);
 
-
-
-  
-  //Serial.println(roll_smooth);
-
- // Test_print();
-  statePrint();
-  
-//print
-
-//
-
-  
-  //Test_print();
+  // Test_print();
+ // statePrint();
   
   } //imu available ends here
   }
@@ -494,15 +386,7 @@ void maintain_loop_time () {
   }
   if(first_time==1)
   {
-    /*
-  Serial.print(ax);
-  Serial.print(" ");
-  Serial.print(pitch_PID);
-  Serial.print(" ");
-  Serial.print(micros());
-  Serial.print(" ");
-  Serial.println();
-  */
+
   }
   
   //Serial.println(" loop slower than 1 ms ");
