@@ -9,6 +9,7 @@
  * Functionality and usability:
  *    When using this template you should note:
  *      * Edit the number for propellers accordengly
+ *      * Implement the correct motor mixing algorythem
  *      * Check you have placed the imu in the correct direction
  *      * Depending on how you would like to control, edit the input channels 
  *      * Input your own computed Kp, Ki, and Kd values 
