@@ -204,7 +204,7 @@ void loop() {
 
 /*For interrupt pint if you choose to use a RC transmitter */
 
-oid blink() {
+void blink() {
   current_count = micros();
   ///////////////////////////////////////Channel 1
   if (GPIOB_PDIR & 2) { //pin 17 (1B 16)    
