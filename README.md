@@ -39,6 +39,6 @@ Data processing tools used:
 Using this code is **completely at your own risk!!!**
 This is an open source project so you can use it as you please.
 
-If you want to use this software please "fork" and "star" this project to make sure your version doesn't change and to show your support to the creators of this project. Enjoy
+If you want to use this software please "fork" and "star" this project to make sure your version doesn't change and to get notified of any updates. Feel free to report issues to be fixed. Enjoy
 
 
