@@ -14,6 +14,13 @@ UAV PID control with teensy 3.6
 # Main Goal 
 This project will be made highly scaleble, so it's not restricted to a Hexacopter as documented in this project it can also be applyed to Quad- Hexa- octo- and so on..- copter.
 
+# Files 
+- 3 DoF UAV - Template 
+- 6 DoF UAV control - Folder "GPS" including the World to body conversion block as separate component this will make it very easy for you to impelement different features like "home lock" "return to home" "switch coordinate system" and so on... 
+
+## simulations files 
+- Hexacopter sim
+- Quadcopter sim
 
 # The UAV used for testing in this project 
 Hardware:
@@ -28,6 +35,15 @@ UAV specs:
 - Configuration: hex x copter
 - Weight without batteries: 2000g
 - Arm length: 400mm
+
+## secondary UAV test
+Hardware:
+- Teensy 3.6
+- teensy prop shield
+
+UAV specs:
+
+- Configuration: quad x copter
 
 
 Data processing tools used:
