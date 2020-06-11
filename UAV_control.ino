@@ -1,39 +1,34 @@
-
-/*
-         UAV-configuration:
-           3-cw  4-ccw
-
-        2-ccw        5-cw
-
-           1-cw  6-ccw
-              (front)
-*/
-
 #include <Servo.h>
 #include <NXPMotionSense.h>
-#include <Wire.h>
 #include <EEPROM.h>
 #include <MadgwickAHRS.h>
-#include "Filter.h"
-#include <util/crc16.h>
 
 NXPMotionSense imu;
 Madgwick filter;
 
+Servo Propeller[6];
 float pwm_[6];
 
-Servo Propeller[6];
 unsigned long counter[6];
 byte last_CH_state[5];
 int input_pin[5];
+
+int fligthMode = 0;
 int pinCount = 6;
+
+
 float roll_pid_values[3] = {1.3, 0.04, 28};
 float pitch_pid_values[3] = {1.3, 0.04, 32};
 float yaw_pid_values[3] = {7, 0.05, 10};
+float pid_i_out[3] = {0, 0, 0};
+
 float desired_angle[3] = {0, 0, 0}; //This is the angle in which we whant the
 float yaw_desired_angle_set = 0;
 float yaw_desired_angle = 0; //This is the angle in which we whant the
-float pid_i_out[3] = {0, 0, 0};
+
+float roll_PID, roll_error, roll_previous_error;
+float pitch_PID, pitch_error, pitch_previous_error;
+float yaw_PID, yaw_error, yaw_previous_error;
 
 //Gyro Variables
 float elapsedTime, time, timePrev;        //Variables for time control
@@ -50,12 +45,13 @@ float main_loop_timer = 0;
 elapsedMillis MPL = 0;
 
 void setup() {
+
   Serial.begin(115200);
+
   for (int thisPin = 14; thisPin < 18; thisPin++) {
     pinMode(thisPin, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(thisPin), blink, CHANGE);
   }
-
   pinMode(22, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(22), blink, CHANGE); //resset pin
 
@@ -69,6 +65,7 @@ void setup() {
   for (int thisProp = 0; thisProp < pinCount; thisProp++) {
     Propeller[thisProp].writeMicroseconds(1000);
   }
+
   imu.begin();
   filter.begin(100);
   // imu.setSeaPressure(98900);
@@ -78,18 +75,31 @@ void loop() {
   time = millis();
   elapsedTime = (time - timePrev) / 1000;
 
-  if (input_pin[0] < 1000) {
+  if (fligthMode == 0) {
+
     stopAll();
     pid_i_out[0] = 0;
     pid_i_out[1] = 0;
     pid_i_out[2] = 0;
     total_yaw = 0;
     yaw_desired_angle = 0;
+
+
+    if ((input_pin[0] < 1000) && (input_pin[1] < 1100) && (input_pin[2] > 1700) && (input_pin[3] < 1100) && ((imu.available()))) {
+      fligthMode = 1;
+      Serial.println("fligt mode 0 ");
+    }
   }
 
 
-  if ((input_pin[0] > 1100) && (imu.available())) { //(start==1)
-    // Read the motion sensors
+  if (fligthMode == 1) { //(start==1)
+
+    if ((input_pin[0] < 1000) && (input_pin[1] > 1700) && (input_pin[2] > 1700) && (input_pin[3] > 1700) || !((imu.available()))) {
+      fligthMode = 0;
+      Serial.println("fligt mode 1 ");
+    }
+
+
     imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
     // Update the SensorFusion filter
     filter.updateIMU(gx, gy, gz, ax, ay, az);
@@ -104,19 +114,18 @@ void loop() {
     yaw_difference = (yaw_previous - yaw);
     yaw_previous = yaw;
 
-    if (yaw_difference < -20)
-    {
+
+    if (yaw_difference < -20) {
       yaw = 1;
     }
-    else if (yaw_difference > 20)
-    {
+    else if (yaw_difference > 20) {
       yaw = -1;
     }
     else {
       yaw = yaw_difference;
     }
 
-    
+
     total_yaw += yaw;
     desired_angle[0] = map(input_pin[1], 1000, 2000, -10, 10);
     desired_angle[1]  = map(input_pin[2], 1000, 2000, -10, 10);
@@ -170,59 +179,10 @@ void loop() {
 
   }
 
-
-
   //maintain_loop_time();
   difference = micros() - main_loop_timer;
 
   while (difference < 1000) {
-      Serial.print(millis()); //time in micros
-      Serial.print(",");
-      Serial.print(roll);
-      Serial.print(",");
-      Serial.print(pitch);
-      Serial.print(",");
-      Serial.print(yaw);
-      Serial.print(",");
-      Serial.print(ax);
-      Serial.print(",");
-      Serial.print(ay);
-      Serial.print(",");
-      Serial.print(az);
-      Serial.print(",");
-      Serial.print(gx);
-      Serial.print(",");
-      Serial.print(gy); //pitch acceleration
-      Serial.print(",");
-      Serial.print(gz);
-      Serial.print(",");
-      Serial.print(pitch_PID);
-      Serial.print(",");
-      Serial.print(roll_PID);
-      Serial.print(",");
-      Serial.print(yaw_PID);
-      Serial.print(",");
-      Serial.print(pwm_5);
-      Serial.print(",");
-      Serial.print(pitch_desired_angle);
-      Serial.print(",");
-      Serial.print(roll_desired_angle);
-      Serial.print(",");
-      Serial.print(yaw_desired_angle);
-      Serial.print(",");
-      Serial.print(pitch_error);
-      Serial.print(",");
-      Serial.print(pwm_1);
-      Serial.print(",");
-      Serial.print(pwm_2);
-      Serial.print(",");
-      Serial.print(pwm_3);
-      Serial.print(",");
-      Serial.print(pwm_4);
-      Serial.print(",");
-      Serial.print(pwm_5);
-      Serial.print(",");
-      Serial.println(pwm_6);
 
     difference = micros() - main_loop_timer;
   }
@@ -237,13 +197,13 @@ void blink() {
   ///////////////////////////////////////Channel 1
   if (GPIOB_PDIR & 2) { //pin 17 (1B 16)
     if (last_CH_state[0] == 0) {
-      last_CH_state[0] = 1;        //Store the current state into the last state for the next loop
-      counter[0] = counter[5]; //Set counter_1 to current value.
+      last_CH_state[0] = 1;      
+      counter[0] = counter[5]; 
     }
   }
   else if (last_CH_state[0] == 1) {
-    last_CH_state[0] = 0;                     //Store the current state into the last state for the next loop
-    input_pin[0] = counter[5] - counter[0]; //We make the time difference. Channel 1 is current_time - timer_1.
+    last_CH_state[0] = 0;                   
+    input_pin[0] = counter[5] - counter[0]; 
   }
 
   ///////////////////////////////////////Channel 2
@@ -268,7 +228,7 @@ void blink() {
   else if (last_CH_state[2] == 1) {
     last_CH_state[2] = 0;
     input_pin[2] = counter[5] - counter[2];
-    input_pin[2] = input_pin[2] - 122;                //outcomment for step
+    input_pin[2] = input_pin[2] - 122;               
   }
   ///////////////////////////////////////Channel 4
   if (GPIOD_PDIR & 2) { //pin 14
@@ -285,13 +245,13 @@ void blink() {
   if (GPIOC_PDIR & 2) { //pin 22 (1B 16)
 
     if (last_CH_state[4] == 0) {
-      last_CH_state[4] = 1;        //Store the current state into the last state for the next loop
-      counter[4] = counter[5]; //Set counter_1 to current value.
+      last_CH_state[4] = 1;     
+      counter[4] = counter[5]; 
     }
   }
   else if (last_CH_state[4] == 1) {
-    last_CH_state[4] = 0;                     //Store the current state into the last state for the next loop
-    input_pin[4] = counter[5] - counter[4]; //We make the time difference. Channel 1 is current_time - timer_1.
+    last_CH_state[4] = 0;                  
+    input_pin[4] = counter[5] - counter[4];
   }
 }
 
