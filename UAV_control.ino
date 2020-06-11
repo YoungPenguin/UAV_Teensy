@@ -16,7 +16,7 @@ int input_pin[5];
 int fligthMode = 0;
 int pinCount = 6;
 
-
+// {Kp, Ki, Kd} values
 float roll_pid_values[3] = {1.3, 0.04, 28};
 float pitch_pid_values[3] = {1.3, 0.04, 32};
 float yaw_pid_values[3] = {7, 0.05, 10};
@@ -31,7 +31,7 @@ float pitch_PID, pitch_error, pitch_previous_error;
 float yaw_PID, yaw_error, yaw_previous_error;
 
 //Gyro Variables
-float elapsedTime, time, timePrev;        //Variables for time control
+float elapsedTime, time, timePrev;
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
@@ -70,6 +70,7 @@ void setup() {
   filter.begin(100);
   // imu.setSeaPressure(98900);
 }
+
 void loop() {
   timePrev = time;
   time = millis();
@@ -78,13 +79,6 @@ void loop() {
   if (fligthMode == 0) {
 
     stopAll();
-    pid_i_out[0] = 0;
-    pid_i_out[1] = 0;
-    pid_i_out[2] = 0;
-    total_yaw = 0;
-    yaw_desired_angle = 0;
-
-
     if ((input_pin[0] < 1000) && (input_pin[1] < 1100) && (input_pin[2] > 1700) && (input_pin[3] < 1100) && ((imu.available()))) {
       fligthMode = 1;
       Serial.println("fligt mode 0 ");
@@ -93,12 +87,10 @@ void loop() {
 
 
   if (fligthMode == 1) { //(start==1)
-
     if ((input_pin[0] < 1000) && (input_pin[1] > 1700) && (input_pin[2] > 1700) && (input_pin[3] > 1700) || !((imu.available()))) {
       fligthMode = 0;
       Serial.println("fligt mode 1 ");
     }
-
 
     imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
     // Update the SensorFusion filter
@@ -114,7 +106,6 @@ void loop() {
     yaw_difference = (yaw_previous - yaw);
     yaw_previous = yaw;
 
-
     if (yaw_difference < -20) {
       yaw = 1;
     }
@@ -124,7 +115,6 @@ void loop() {
     else {
       yaw = yaw_difference;
     }
-
 
     total_yaw += yaw;
     desired_angle[0] = map(input_pin[1], 1000, 2000, -10, 10);
@@ -137,7 +127,6 @@ void loop() {
     roll_error = roll - desired_angle[0];
     pitch_error = pitch - desired_angle[1];
     yaw_error = total_yaw - desired_angle[2];
-
 
     pid_i_out[0] += (roll_pid_values[1] * roll_error);
     pid_i_out[1] += (pitch_pid_values[1] * pitch_error);
@@ -166,44 +155,42 @@ void loop() {
     pwm_[4] = input_pin[0] + 0.5 * roll_PID - yaw_PID;
     pwm_[5] = input_pin[0] + roll_PID - 1.732 * pitch_PID + yaw_PID; // roll, pitch, yaw
 
-    pwm_[0] = anti_windup(pwm_[0], 1000, 2000);
-    pwm_[1] = anti_windup(pwm_[1], 1000, 2000);
-    pwm_[2] = anti_windup(pwm_[2], 1000, 2000);
-    pwm_[3] = anti_windup(pwm_[3], 1000, 2000);
-    pwm_[4] = anti_windup(pwm_[4], 1000, 2000);
-    pwm_[5] = anti_windup(pwm_[5], 1000, 2000);
-
-    for (int Prop_PWM = 0; Prop_PWM < 6; Prop_PWM++) {
-      Propeller[Prop_PWM].writeMicroseconds(pwm_[Prop_PWM]);
+    for (int nm = 0; nm < pinCount; nm++) {
+      pwm_[nm] = anti_windup(pwm_[nm], 1000, 2000);
     }
 
+    for (int Prop_PWM = 0; Prop_PWM < pinCount; Prop_PWM++) {
+      Propeller[Prop_PWM].writeMicroseconds(pwm_[Prop_PWM]);
+    }
   }
 
-  //maintain_loop_time();
+
+  // maintain loop time of 1ms //
   difference = micros() - main_loop_timer;
-
   while (difference < 1000) {
-
+    /*make you data extraction here*/
     difference = micros() - main_loop_timer;
   }
-
   main_loop_timer = micros();
-
-
 }
+
+
+
+// End of main loop //
+
 
 void blink() {
   counter[5] = micros();
   ///////////////////////////////////////Channel 1
   if (GPIOB_PDIR & 2) { //pin 17 (1B 16)
     if (last_CH_state[0] == 0) {
-      last_CH_state[0] = 1;      
-      counter[0] = counter[5]; 
+      last_CH_state[0] = 1;
+      counter[0] = counter[5];
     }
   }
   else if (last_CH_state[0] == 1) {
-    last_CH_state[0] = 0;                   
-    input_pin[0] = counter[5] - counter[0]; 
+    last_CH_state[0] = 0;
+    input_pin[0] = counter[5] - counter[0];
   }
 
   ///////////////////////////////////////Channel 2
@@ -228,7 +215,7 @@ void blink() {
   else if (last_CH_state[2] == 1) {
     last_CH_state[2] = 0;
     input_pin[2] = counter[5] - counter[2];
-    input_pin[2] = input_pin[2] - 122;               
+    input_pin[2] = input_pin[2] - 122;
   }
   ///////////////////////////////////////Channel 4
   if (GPIOD_PDIR & 2) { //pin 14
@@ -245,12 +232,12 @@ void blink() {
   if (GPIOC_PDIR & 2) { //pin 22 (1B 16)
 
     if (last_CH_state[4] == 0) {
-      last_CH_state[4] = 1;     
-      counter[4] = counter[5]; 
+      last_CH_state[4] = 1;
+      counter[4] = counter[5];
     }
   }
   else if (last_CH_state[4] == 1) {
-    last_CH_state[4] = 0;                  
+    last_CH_state[4] = 0;
     input_pin[4] = counter[5] - counter[4];
   }
 }
@@ -270,4 +257,9 @@ void stopAll() {
   for (int thisProp = 0; thisProp < pinCount; thisProp++) {
     Propeller[thisProp].writeMicroseconds(1000);
   }
+  pid_i_out[0] = 0;
+  pid_i_out[1] = 0;
+  pid_i_out[2] = 0;
+  total_yaw = 0;
+  yaw_desired_angle = 0;
 }
