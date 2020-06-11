@@ -18,12 +18,6 @@
 NXPMotionSense imu;
 Madgwick filter;
 
-Servo prop__1;
-Servo prop__2;
-Servo prop__3;
-Servo prop__4;
-Servo prop__5;
-Servo prop__6;
 float pwm_[6];
 int fligthMode = 0;
 Servo Propeller[6];
