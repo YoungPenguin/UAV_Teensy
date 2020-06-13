@@ -1,6 +1,7 @@
 # UAV_Teensy
-# Covid-19 update 28/03/2020
-Due to Covid-19, this project will be carried out on a more theoretical level than initially expected. So if you want to use this controller for your own project, then you will have to wait a little longer for controller confirmation.
+Please make sure to read the entire README.md file **BEFORE** doing anything. Thank you!
+
+If you want to use this software please "fork" and "star" this project to make sure your version doesn't change and to get notified of any updates. Feel free to report issues to be fixed. Enjoy
 
 ****description comming at the end of this project: 26/6/2020***
 
@@ -54,7 +55,5 @@ Data processing tools used:
 # Licence
 Using this code is **completely at your own risk!!!**
 This is an open source project so you can use it as you please.
-
-If you want to use this software please "fork" and "star" this project to make sure your version doesn't change and to get notified of any updates. Feel free to report issues to be fixed. Enjoy
 
 
