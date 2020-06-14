@@ -17,7 +17,6 @@ Madgwick filter;
 
 /* functions */
 void Transmitter();
-void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
 float Yaw_counter(float yaw_difference);
 
 /*Add differet fligth modes*/
@@ -25,13 +24,15 @@ void flightMode0(); // dis-armed
 void flightMode1(); // armed
 // void flightMode2(); // GPS hold
 
-// total number of motors
-Servo Propeller[6];
-float pwm_[6];
-
+void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
 #define T 0.004
 #define pinCount 6
 
+// total number of motors
+Servo Propeller[pinCount];
+float pwm_[pinCount] = {0.0, 0.0, 0.0};
+
+// inizial flight mode
 int flightMode = 0;
 
 unsigned long counter[6];
@@ -41,10 +42,10 @@ int input_pin[5];
 /*{Kp, Ki, Kd}*/
 float roll_pid_values[3]    = {0.0, 0.0, 0.0};
 float pitch_pid_values[3]   = {0.0, 0.0, 0.0};
-float yaw_pid_values[3]     = {0, 0.0, 0.0};
-float desired_angle[3]      = {0, 0, 0};
-float yaw_desired_angle_set = 0;
-float total_yaw             = 0;
+float yaw_pid_values[3]     = {0.0, 0.0, 0.0};
+float desired_angle[3]      = {0.0, 0.0, 0.0};
+float yaw_desired_angle_set = 0.0;
+float total_yaw             = 0.0;
 
 float roll, pitch, yaw, yaw_previous, yaw_difference;
 
@@ -138,9 +139,9 @@ void stopAll() {
   for (int thisProp = 0; thisProp < pinCount; thisProp++) {
     Propeller[thisProp].writeMicroseconds(1000);
   }
-  pid_i_out[0] = 0;
-  pid_i_out[1] = 0;
-  pid_i_out[2] = 0;
-  total_yaw = 0;
+  I_term[0]        = 0;
+  I_term[1]        = 0;
+  I_term[2]        = 0;
+  total_yaw        = 0;
   desired_angle[2] = 0;
 }
