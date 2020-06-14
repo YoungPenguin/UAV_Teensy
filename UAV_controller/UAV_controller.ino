@@ -39,13 +39,13 @@ byte last_CH_state[5];
 int input_pin[5];
 
 /*{Kp, Ki, Kd}*/
-float roll_pid_values[3]  = {0.0, 0.0, 0.0};
-float pitch_pid_values[3] = {0.0, 0.0, 0.0};
-float yaw_pid_values[3]   = {0, 0.0, 0.0};
-
+float roll_pid_values[3]    = {0.0, 0.0, 0.0};
+float pitch_pid_values[3]   = {0.0, 0.0, 0.0};
+float yaw_pid_values[3]     = {0, 0.0, 0.0};
 float desired_angle[3]      = {0, 0, 0};
 float yaw_desired_angle_set = 0;
 float total_yaw             = 0;
+
 float roll, pitch, yaw, yaw_previous, yaw_difference;
 
 float PID_output[3];
