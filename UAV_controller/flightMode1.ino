@@ -16,38 +16,44 @@ void flightMode1() {
     yaw_previous = yaw;
     total_yaw = Yaw_counter(yaw_difference);
 
+    desired_angle[0] = map(input_pin[1], 1000, 2000, -10, 10);
+    desired_angle[1]  = map(input_pin[2], 1000, 2000, -10, 10);
     desired_angle[2] = map(input_pin[3], 1000, 2000, -2, 2);
     desired_angle[2] = desired_angle[2] / 10;
     desired_angle[2]  += desired_angle[2];
 
-    desired_angle[0] = map(input_pin[1], 1000, 2000, -10, 10);
-    desired_angle[1]  = map(input_pin[2], 1000, 2000, -10, 10);
+    error[0] = roll - desired_angle[0];
+    error[1] = pitch - desired_angle[1];
+    error[2] = total_yaw - desired_angle[2];
 
-    roll_error = roll - desired_angle[0];
-    pitch_error = pitch - desired_angle[1];
-    yaw_error = total_yaw - desired_angle[2];
+    P_term[0] = roll_pid_values[0] * error[0];
+    P_term[1] = pitch_pid_values[0] * error[1];
+    P_term[2] = yaw_pid_values[0] * error[2];
 
-    pid_i_out[0] += roll_pid_values[1] * T * roll_error;
-    pid_i_out[1] += pitch_pid_values[1] * T * pitch_error;
-    pid_i_out[2] += yaw_pid_values[1] * T * yaw_error;
+    I_term[0] = old_I_term[0] + roll_pid_values[1] * error[0] * T;
+    I_term[1] = old_I_term[1] + pitch_pid_values[1] * error[1] * T;
+    I_term[2] = old_I_term[2] + yaw_pid_values[1] * error[2] * T;
 
-    pid_i_out[0] = anti_windup(pid_i_out[0], -3, 3);
-    pid_i_out[1] = anti_windup(pid_i_out[1], -3, 3);
-    pid_i_out[2] = anti_windup(pid_i_out[2], -3, 3);
+    D_term[0] = roll_pid_values[2] * (error[0] - old_error[0]) / T;
+    D_term[1] = pitch_pid_values[2] * (error[1] - old_error[1]) / T;
+    D_term[2] = yaw_pid_values[2] * (error[2] - old_error[2]) / T;
 
-    roll_PID  = roll_pid_values[0] * (roll_error + pid_i_out[0] + roll_pid_values[2] * ((roll_error - roll_previous_error) / T));
-    pitch_PID = pitch_pid_values[0] * (pitch_error + pid_i_out[0] + pitch_pid_values[2] * ((pitch_error - pitch_previous_error) / T));
-    yaw_PID   = yaw_pid_values[0] * (yaw_error + pid_i_out[0] + yaw_pid_values[2] * ((yaw_error - yaw_previous_error) / T));
+    PID_output[0] = P_term[0] + I_term[0] + D_term[0];
+    PID_output[1] = P_term[1] + I_term[1] + D_term[1];
+    PID_output[2]   = P_term[2] + I_term[2] + D_term[2];
 
-    pitch_previous_error = pitch_error;
-    roll_previous_error = roll_error;
-    yaw_previous_error = yaw_error;
+    old_error[0] = error[0];
+    old_error[1] = error[1];
+    old_error[2] = error[2];
+    old_I_term[0] = I_term[0];
+    old_I_term[1] = I_term[1];
+    old_I_term[2] = I_term[2];
 
-    roll_PID = anti_windup(roll_PID, -400, 400);
-    pitch_PID = anti_windup(pitch_PID, -400, 400);
-    yaw_PID = anti_windup(yaw_PID, -400, 400);
+    PID_output[0] = anti_windup(PID_output[0], -400, 400);
+    PID_output[1] = anti_windup(PID_output[1], -400, 400);
+    PID_output[2] = anti_windup(PID_output[2], -400, 400);
 
-    MotorMix_HEX(input_pin[0], roll_PID, pitch_PID, yaw_PID);
+    MotorMix_HEX(input_pin[0], PID_output[0], PID_output[2], PID_output[2]);
 
   }
 }

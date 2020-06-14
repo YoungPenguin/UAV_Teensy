@@ -38,24 +38,27 @@ unsigned long counter[6];
 byte last_CH_state[5];
 int input_pin[5];
 
-float roll_pid_values[3] = {2.3, 0.04, 0.0};
-float pitch_pid_values[3] = {2.3, 0.04, 0.0};
-float yaw_pid_values[3] = {0, 0.0, 0.0};
+/*{Kp, Ki, Kd}*/
+float roll_pid_values[3]  = {0.0, 0.0, 0.0};
+float pitch_pid_values[3] = {0.0, 0.0, 0.0};
+float yaw_pid_values[3]   = {0, 0.0, 0.0};
 
-float desired_angle[3] = {0, 0, 0};
+float desired_angle[3]      = {0, 0, 0};
 float yaw_desired_angle_set = 0;
+float total_yaw             = 0;
+float roll, pitch, yaw, yaw_previous, yaw_difference;
 
-float roll_PID, roll_error, roll_previous_error;
-float pitch_PID, pitch_error, pitch_previous_error;
-float yaw_PID, yaw_error, yaw_previous_error;
-
-float pid_i_out[3] = {0, 0, 0};
+float PID_output[3];
+float error[3];
+float old_error[3];
+float P_term[3]     = {0,0,0};
+float I_term[3]     = {0,0,0};
+float old_I_term[3] = {0,0,0};
+float D_term[3]     = {0,0,0};
 
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
-float roll, pitch, yaw, yaw_previous, yaw_difference;
-float total_yaw = 0;
 
 // timing the code
 volatile int cycles;
@@ -96,6 +99,7 @@ void setup() {
 void loop() {
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
+  
   switch (flightMode) {
     case 0:
       flightMode0();
@@ -107,9 +111,10 @@ void loop() {
     //      flightMode2();
     //      break;
     default:
-      stopAll();
+      flightMode0();
       break;
   }
+  
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
 
   while (cycles < 720000) {
@@ -117,7 +122,8 @@ void loop() {
   }
 }
 
-///////////////////////// just some handy functions /////////////////////////////////////////
+
+/* just some handy functions */
 
 int anti_windup(float a, float b, float c) {
   if (a < b) {
