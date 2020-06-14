@@ -18,11 +18,11 @@ Madgwick filter;
 /* functions */
 void Transmitter();
 float Yaw_counter(float yaw_difference);
-boolean failsafe();
 
 /*Add differet fligth modes*/
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
+void failsafe(); // fligthmode 3 = failsafe
 // void flightMode2(); // GPS hold
 
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
@@ -53,10 +53,10 @@ float roll, pitch, yaw, yaw_previous, yaw_difference;
 float PID_output[3];
 float error[3];
 float old_error[3];
-float P_term[3]     = {0,0,0};
-float I_term[3]     = {0,0,0};
-float old_I_term[3] = {0,0,0};
-float D_term[3]     = {0,0,0};
+float P_term[3]     = {0, 0, 0};
+float I_term[3]     = {0, 0, 0};
+float old_I_term[3] = {0, 0, 0};
+float D_term[3]     = {0, 0, 0};
 
 float ax, ay, az;
 float gx, gy, gz;
@@ -64,6 +64,7 @@ float mx, my, mz;
 
 // timing the code
 volatile int cycles;
+boolean failsafe_flag = false;
 
 void setup() {
 
@@ -102,6 +103,8 @@ void loop() {
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
   
+  failsafe();
+  
   switch (flightMode) {
     case 0:
       flightMode0();
@@ -109,14 +112,17 @@ void loop() {
     case 1:
       flightMode1();
       break;
-    //    case 2:
+    case 2:
+      stopAll();
+      break;
+    //    case 3:
     //      flightMode2();
     //      break;
     default:
-      flightMode0();
+      stopAll();
       break;
   }
-  
+
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
 
   while (cycles < 720000) {
