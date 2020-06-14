@@ -18,6 +18,7 @@ Madgwick filter;
 /* functions */
 void Transmitter();
 float Yaw_counter(float yaw_difference);
+boolean failsafe();
 
 /*Add differet fligth modes*/
 void flightMode0(); // dis-armed
