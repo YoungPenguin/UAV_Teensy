@@ -1,6 +1,5 @@
 void data_vector(){
-   //Serial.println("Quick enough, loop faster than 1 ms ");
-      Serial.print(millis()); //time in micros
+      Serial.print(millis()); 
       Serial.print(",");
       Serial.print(roll);
       Serial.print(",");
@@ -16,16 +15,8 @@ void data_vector(){
       Serial.print(",");
       Serial.print(gx);
       Serial.print(",");
-      Serial.print(gy); //pitch acceleration
+      Serial.print(gy); 
       Serial.print(",");
-      Serial.print(gz);
-      Serial.print(",");
-      Serial.print(pitch_PID);
-      Serial.print(",");
-      Serial.print(roll_PID);
-      Serial.print(",");
-      Serial.print(yaw_PID);
-      Serial.print(",");
-      Serial.println(pitch_error);
+      Serial.println(gz);
 
 }

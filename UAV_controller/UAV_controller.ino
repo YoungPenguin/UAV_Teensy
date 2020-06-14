@@ -97,7 +97,6 @@ void loop() {
 
   }
 
-
   if (fligthMode == 1) { //(start==1)
     if ((input_pin[0] < 1000) && (input_pin[1] > 1700) && (input_pin[2] > 1700) && (input_pin[3] > 1700)) {
       fligthMode = 0;
