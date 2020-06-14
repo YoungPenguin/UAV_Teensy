@@ -20,8 +20,11 @@ This project will be made highly scaleble, so it's not restricted to a Hexacopte
 - 6 DoF UAV control - Folder "GPS" including the World to body conversion block as separate component this will make it very easy for you to impelement different features like "home lock" "return to home" "switch coordinate system" and so on... 
 
 ## simulations files 
+If you have a valid matlab licence you can use:
 - Hexacopter sim
 - Quadcopter sim
+
+If you don't. No need to worry, i will make simulation in python soon....
 
 # The UAV used for testing in this project 
 Hardware:
