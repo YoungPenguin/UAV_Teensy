@@ -11,5 +11,5 @@ float Yaw_counter(float yaw_difference) {
     yaw = yaw_difference;
   }
   total_yaw += yaw;
-return total_yaw;
+  return total_yaw;
 }
