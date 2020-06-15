@@ -53,7 +53,7 @@ void flightMode1() {
     PID_output[1] = anti_windup(PID_output[1], -400, 400);
     PID_output[2] = anti_windup(PID_output[2], -400, 400);
 
-    MotorMix_HEX(input_pin[0], PID_output[0], PID_output[2], PID_output[2]);
+    MotorMix_HEX(input_pin[0], PID_output[0], PID_output[1], PID_output[2]);
 
   }
 }

@@ -22,8 +22,8 @@ float Yaw_counter(float yaw_difference);
 /*Add differet fligth modes*/
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
-void failsafe(); // fligthmode 3 = failsafe
-// void flightMode2(); // GPS hold
+void failsafe(); // fligthmode 2 = failsafe
+// void flightMode3(); // GPS hold
 
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
 #define T 0.004
@@ -103,7 +103,7 @@ void loop() {
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
   
-  failsafe();
+  failsafe(); // tjeck if connection is lost 
   
   switch (flightMode) {
     case 0:
@@ -116,7 +116,7 @@ void loop() {
       stopAll();
       break;
     //    case 3:
-    //      flightMode2();
+    //      flightMode3();
     //      break;
     default:
       stopAll();
