@@ -11,10 +11,13 @@
 #include <MadgwickAHRS.h>
 #include <Wire.h>
 #include <EEPROM.h>
+#include "SparkFunMPL3115A2.h"
 
 NXPMotionSense imu;
 Madgwick filter;
+MPL3115A2 myPressure;
 
+float Height;
 /* functions */
 void Transmitter();
 float Yaw_counter(float yaw_difference);
@@ -23,11 +26,13 @@ float Yaw_counter(float yaw_difference);
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
-// void flightMode3(); // GPS hold
+void flightMode3(); // Altitude - 4ms loop time
+// void flightMode4(); // GPS hold
 
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
 #define T 0.004
 #define pinCount 6
+int loop_time = 720000;
 
 // total number of motors
 Servo Propeller[pinCount];
@@ -41,9 +46,9 @@ byte last_CH_state[5];
 int input_pin[5];
 
 /*{Kp, Ki, Kd}*/
-float roll_pid_values[3]    = {0.0, 0.0, 0.0};
-float pitch_pid_values[3]   = {0.0, 0.0, 0.0};
-float yaw_pid_values[3]     = {0.0, 0.0, 0.0};
+float roll_pid_values[3]    = {1.0, 0.0, 0.0};
+float pitch_pid_values[3]   = {1.0, 0.0, 0.0};
+float yaw_pid_values[3]     = {1.0, 0.0, 0.0};
 float desired_angle[3]      = {0.0, 0.0, 0.0};
 float yaw_desired_angle_set = 0.0;
 float total_yaw             = 0.0;
@@ -98,13 +103,22 @@ void setup() {
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
+
+  myPressure.begin(); // Get sensor online
+  myPressure.setModeBarometer(); // Measure pressure in Pascals from 20 to 110 kPa
+
+  myPressure.setOversampleRate(1); // Set Oversample to the recommended 128
+  myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
+
+
+
+
+
 }
 void loop() {
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
-  
-  failsafe(); // tjeck if connection is lost 
-  
+
   switch (flightMode) {
     case 0:
       flightMode0();
@@ -115,9 +129,12 @@ void loop() {
     case 2:
       stopAll();
       break;
-    //    case 3:
-    //      flightMode3();
-    //      break;
+/*    case 3:
+      flightMode3();
+      float pressure = myPressure.readPressure();
+      float temperature = 25 + 273.15; // = myPressure.readTemp() + 273.15;
+      Height = -(log(pressure / 100900) * 8.3143 * temperature) / (0.28401072);
+      break;*/
     default:
       stopAll();
       break;
@@ -125,7 +142,7 @@ void loop() {
 
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
 
-  while (cycles < 720000) {
+  while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   }
 }
