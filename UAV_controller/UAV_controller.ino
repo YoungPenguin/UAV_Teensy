@@ -143,7 +143,9 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
 
   while (cycles < loop_time) {
+   data_vector();
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
+    
   }
 }
 

@@ -1,10 +1,10 @@
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID) {
-  pwm_[0] = input - roll_PID - 1.732 * pitch_PID - yaw_PID;
-  pwm_[1] = input - 0.5 * roll_PID + yaw_PID;
-  pwm_[2] = input - roll_PID + 1.732 * pitch_PID - yaw_PID;
-  pwm_[3] = input + roll_PID + 1.732 * pitch_PID + yaw_PID;
-  pwm_[4] = input + 0.5 * roll_PID - yaw_PID;
-  pwm_[5] = input + roll_PID - 1.732 * pitch_PID + yaw_PID;
+  pwm_[0] = input - 1.732 * pitch_PID;
+  pwm_[1] = input;
+  pwm_[2] = input  + 1.732 * pitch_PID;
+  pwm_[3] = input + 1.732 * pitch_PID;
+  pwm_[4] = input;
+  pwm_[5] = input  - 1.732 * pitch_PID;
 
   for (int nm = 0; nm < 6; nm++) {
     pwm_[nm] = anti_windup(pwm_[nm], 1000, 2000);

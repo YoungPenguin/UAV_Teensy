@@ -23,7 +23,9 @@ void flightMode1() {
   desired_angle[2] = map(input_pin[3], 1000, 2000, -2, 2);
   desired_angle[2] = desired_angle[2] / 10;
   desired_angle[2]  += desired_angle[2];
-
+if(input_pin[4]>1500){
+  desired_angle[1] = 10;
+}
   error[0] = roll - desired_angle[0];
   error[1] = pitch - desired_angle[1];
   error[2] = total_yaw - desired_angle[2];
