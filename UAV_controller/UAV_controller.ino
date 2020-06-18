@@ -46,9 +46,9 @@ byte last_CH_state[5];
 int input_pin[5];
 
 /*{Kp, Ki, Kd}*/
-float roll_pid_values[3]    = {1.0, 0.0, 0.0};
-float pitch_pid_values[3]   = {1.0, 0.0, 0.0};
-float yaw_pid_values[3]     = {1.0, 0.0, 0.0};
+float roll_pid_values[3]    = {0.7, 0.6, 0.15};
+float pitch_pid_values[3]   = {0.6, 0.6, 0.1};
+float yaw_pid_values[3]     = {2.0, 0.5, 1.0};
 float desired_angle[3]      = {0.0, 0.0, 0.0};
 float yaw_desired_angle_set = 0.0;
 float total_yaw             = 0.0;
