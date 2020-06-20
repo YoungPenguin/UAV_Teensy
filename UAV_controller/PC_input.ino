@@ -1,8 +1,10 @@
 void PC_input() {
   // send data only when you receive data:
   if (Serial.available() > 0) {
-    string[0] = Serial.read();
-    string[1] = Serial.read();
+    string[0] = Serial.read(); // action letter
+    string[1] = Serial.read(); //sign
+
+    /* the value itself */
     for (int i = 2; i < 6; i++) {
       string[i] = Serial.read();
     }
@@ -13,7 +15,7 @@ void PC_input() {
     sign = (string[1] == '-') ? -1 : 1;
 
     val = ((temp100 * 100) + (temp10 * 10) + temp1) * sign;
-    if (val > -180 && val < 180) {
+    if (val > -180 || val < 180) {
       switch (string[0]) {
         case 'R':
           Serial_input[0] = val;
@@ -28,8 +30,10 @@ void PC_input() {
           Serial_input[3] = val;
           break;
         default:
-          Serial.print("Invalid input: '");
-          Serial.println(string[0]);
+          Serial_input[0] = 0;
+          Serial_input[1] = 0;
+          Serial_input[2] = 0;
+          Serial_input[3] = 0;
           break;
       }
     }
