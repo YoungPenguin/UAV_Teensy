@@ -8,6 +8,7 @@ void PC_input() {
     for (int i = 2; i < 6; i++) {
       string[i] = Serial.read();
     }
+    
     int temp100 = (int)string[2] - 48;
     int temp10  = (int)string[3] - 48;
     int temp1   = (int)string[4] - 48;
