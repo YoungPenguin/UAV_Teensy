@@ -21,12 +21,12 @@ float Height;
 /* functions */
 void Transmitter();
 float Yaw_counter(float yaw_difference);
-
+void PC_input();
 /*Add differet fligth modes*/
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
-void flightMode3(); // Altitude - 4ms loop time
+//void flightMode3(); // Altitude - 4ms loop time no thx
 // void flightMode4(); // GPS hold
 
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
@@ -70,11 +70,16 @@ float mx, my, mz;
 // timing the code
 volatile int cycles;
 boolean failsafe_flag = false;
+char inputBuffer[16];
+
+int Serial_input[4] = {0, 0, 0, 0};
+char string[4]      = {0, 0, 0, 0};
+int val             = 0;
 
 void setup() {
 
   Serial.begin(9600);
-
+  Serial.setTimeout(1); // the timeout for serial.read is standard @ 1000 - we don't want that
   for (int thisPin = 14; thisPin < 18; thisPin++) {
     pinMode(thisPin, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(thisPin), blink, CHANGE);
@@ -103,17 +108,13 @@ void setup() {
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
-
+/*
   myPressure.begin(); // Get sensor online
   myPressure.setModeBarometer(); // Measure pressure in Pascals from 20 to 110 kPa
 
   myPressure.setOversampleRate(1); // Set Oversample to the recommended 128
   myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
-
-
-
-
-
+*/
 }
 void loop() {
   uint32_t startCycleCPU;
@@ -143,7 +144,7 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
 
   while (cycles < loop_time) {
-   data_vector();
+  // data_vector();
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
     
   }

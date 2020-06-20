@@ -26,7 +26,7 @@ float Yaw_counter(float yaw_difference);
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
-void flightMode3(); // Altitude - 4ms loop time
+//void flightMode3(); // Altitude - 4ms loop time no thx
 // void flightMode4(); // GPS hold
 
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
@@ -46,9 +46,9 @@ byte last_CH_state[5];
 int input_pin[5];
 
 /*{Kp, Ki, Kd}*/
-float roll_pid_values[3]    = {1.0, 0.0, 0.0};
-float pitch_pid_values[3]   = {0.4, 0.9, 0.3};
-float yaw_pid_values[3]     = {1.0, 0.0, 0.0};
+float roll_pid_values[3]    = {0.7, 0.6, 0.15};
+float pitch_pid_values[3]   = {0.6, 0.6, 0.1};
+float yaw_pid_values[3]     = {2.0, 0.5, 1.0};
 float desired_angle[3]      = {0.0, 0.0, 0.0};
 float yaw_desired_angle_set = 0.0;
 float total_yaw             = 0.0;
@@ -143,7 +143,9 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
 
   while (cycles < loop_time) {
+   data_vector();
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
+    
   }
 }
 
