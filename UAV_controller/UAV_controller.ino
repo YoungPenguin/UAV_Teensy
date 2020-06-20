@@ -106,11 +106,12 @@ void setup() {
   for (int thisProp = 0; thisProp < pinCount; thisProp++) {
     Propeller[thisProp].writeMicroseconds(1000);
   }
+
   imu.begin();
   filter.begin(100);
   // imu.setSeaPressure(98900);
 
-  /*Used for timing*/
+  /* Used for timing */
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
@@ -151,10 +152,10 @@ void loop() {
   }
 
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-//Serial.println(cycles);
+  //Serial.println(cycles);
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-   // data_vector();
+    data_vector();
   }
 }
 
@@ -162,12 +163,8 @@ void loop() {
 /* just some handy functions */
 
 int anti_windup(float a, float b, float c) {
-  if (a < b) {
-    a = b;
-  }
-  if (a > c) {
-    a = c;
-  }
+  a = (a < b) ? b : a;
+  a = (a > c) ? c : a;
   return a;
 }
 void stopAll() {
