@@ -3,6 +3,5 @@ void flightMode0() {
     flightMode = 1;
     digitalWrite(13, HIGH);
   }
-
   stopAll();
 }

@@ -14,7 +14,7 @@
 //#include "SparkFunMPL3115A2.h"
 
 NXPMotionSense imu;
-Madgwick filter;
+Madgwick filter; // using the madgwick algo - change to mahony if you have problem with drift
 // zMPL3115A2 myPressure;
 // float Height;
 
@@ -159,7 +159,6 @@ void loop() {
   }
 }
 
-
 /* just some handy functions */
 
 int anti_windup(float a, float b, float c) {
@@ -167,6 +166,7 @@ int anti_windup(float a, float b, float c) {
   a = (a > c) ? c : a;
   return a;
 }
+
 void stopAll() {
   for (int thisProp = 0; thisProp < pinCount; thisProp++) {
     Propeller[thisProp].writeMicroseconds(1000);
