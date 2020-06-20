@@ -2,15 +2,14 @@ void PC_input() {
   // send data only when you receive data:
   if (Serial.available() > 0) {
     int availableBytes = Serial.available();
-    for (int i = 0; i < availableBytes; i++)
-    {
+    for (int i = 0; i < availableBytes; i++) {
       string[i] = Serial.read();
     }
     int temp100 = (int)string[1] - 48;
     int temp10 = (int)string[2] - 48;
     int temp1 = (int)string[3] - 48;
     val = (temp100 * 100) + (temp10 * 10) + temp1;
-    val = map(val,1000,2000,-500,500);
+    val = map(val, 1000, 2000, -500, 500);
   }
   if (val > -500 && val < 500) {
     switch (string[0]) {

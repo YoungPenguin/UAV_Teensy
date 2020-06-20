@@ -11,17 +11,19 @@
 #include <MadgwickAHRS.h>
 #include <Wire.h>
 #include <EEPROM.h>
-#include "SparkFunMPL3115A2.h"
+//#include "SparkFunMPL3115A2.h"
 
 NXPMotionSense imu;
 Madgwick filter;
-//zMPL3115A2 myPressure;
 
-float Height;
+//zMPL3115A2 myPressure;
+//float Height;
+
 /* functions */
 void Transmitter();
 float Yaw_counter(float yaw_difference);
 void PC_input();
+
 /*Add differet fligth modes*/
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
@@ -49,9 +51,16 @@ int input_pin[5];
 float roll_pid_values[3]    = {0.7, 0.6, 0.15};
 float pitch_pid_values[3]   = {0.6, 0.6, 0.1};
 float yaw_pid_values[3]     = {2.0, 0.5, 1.0};
+
+/*Controller inputs*/
 float desired_angle[3]      = {0.0, 0.0, 0.0};
 float yaw_desired_angle_set = 0.0;
 float total_yaw             = 0.0;
+
+/*PC input with serial check PC_input for the commands*/
+int Serial_input[4] = {0, 0, 0, 0};
+char string[4]      = {0, 0, 0, 0};
+int val             = 0;
 
 float roll, pitch, yaw, yaw_previous, yaw_difference, last_yaw;
 
@@ -63,6 +72,7 @@ float I_term[3]     = {0, 0, 0};
 float old_I_term[3] = {0, 0, 0};
 float D_term[3]     = {0, 0, 0};
 
+/*Prop shield varibles*/
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
@@ -70,11 +80,6 @@ float mx, my, mz;
 // timing the code
 volatile int cycles;
 boolean failsafe_flag = false;
-char inputBuffer[16];
-
-int Serial_input[4] = {0, 0, 0, 0};
-char string[4]      = {0, 0, 0, 0};
-int val             = 0;
 
 void setup() {
 
@@ -108,13 +113,13 @@ void setup() {
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
-/*
-  myPressure.begin(); // Get sensor online
-  myPressure.setModeBarometer(); // Measure pressure in Pascals from 20 to 110 kPa
+  /*
+    myPressure.begin(); // Get sensor online
+    myPressure.setModeBarometer(); // Measure pressure in Pascals from 20 to 110 kPa
 
-  myPressure.setOversampleRate(1); // Set Oversample to the recommended 128
-  myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
-*/
+    myPressure.setOversampleRate(1); // Set Oversample to the recommended 128
+    myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
+  */
 }
 void loop() {
   uint32_t startCycleCPU;
@@ -130,12 +135,12 @@ void loop() {
     case 2:
       stopAll();
       break;
-/*    case 3:
-      flightMode3();
-      float pressure = myPressure.readPressure();
-      float temperature = 25 + 273.15; // = myPressure.readTemp() + 273.15;
-      Height = -(log(pressure / 100900) * 8.3143 * temperature) / (0.28401072);
-      break;*/
+    /*    case 3:
+          flightMode3();
+          float pressure = myPressure.readPressure();
+          float temperature = 25 + 273.15; // = myPressure.readTemp() + 273.15;
+          Height = -(log(pressure / 100900) * 8.3143 * temperature) / (0.28401072);
+          break;*/
     default:
       stopAll();
       break;
@@ -144,9 +149,9 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
 
   while (cycles < loop_time) {
-  // data_vector();
+    // data_vector();
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-    
+
   }
 }
 

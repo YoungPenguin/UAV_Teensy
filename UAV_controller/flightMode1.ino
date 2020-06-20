@@ -25,6 +25,7 @@ void flightMode1() {
   desired_angle[2] += last_yaw;
 
   last_yaw = desired_angle[2];
+
   /* Switch for the serial input */
   if (input_pin[4] < 1500) {
     error[0] = roll - (desired_angle[0] + Serial_input[0]);
@@ -35,7 +36,9 @@ void flightMode1() {
     error[1] = pitch - (desired_angle[1]);
     error[2] = total_yaw - (desired_angle[2]);
   }
+  /*Switch for the serial input */
 
+  /*3x PID*/
   P_term[0] = roll_pid_values[0] * error[0];
   P_term[1] = pitch_pid_values[0] * error[1];
   P_term[2] = yaw_pid_values[0] * error[2];
@@ -62,6 +65,7 @@ void flightMode1() {
   PID_output[0] = anti_windup(PID_output[0], -400, 400);
   PID_output[1] = anti_windup(PID_output[1], -400, 400);
   PID_output[2] = anti_windup(PID_output[2], -400, 400);
+  /*3x PID*/
 
   MotorMix_HEX(input_pin[0], PID_output[0], PID_output[1], PID_output[2]);
 
