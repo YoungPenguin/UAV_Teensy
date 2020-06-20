@@ -15,7 +15,7 @@
 
 NXPMotionSense imu;
 Madgwick filter;
-MPL3115A2 myPressure;
+//zMPL3115A2 myPressure;
 
 float Height;
 /* functions */
@@ -53,7 +53,7 @@ float desired_angle[3]      = {0.0, 0.0, 0.0};
 float yaw_desired_angle_set = 0.0;
 float total_yaw             = 0.0;
 
-float roll, pitch, yaw, yaw_previous, yaw_difference;
+float roll, pitch, yaw, yaw_previous, yaw_difference, last_yaw;
 
 float PID_output[3];
 float error[3];

@@ -10,22 +10,21 @@ void PC_input() {
     int temp10 = (int)string[2] - 48;
     int temp1 = (int)string[3] - 48;
     val = (temp100 * 100) + (temp10 * 10) + temp1;
-    val = map(val,1000,2000,-500,500);
   }
-  if (val > -500 && val < 500) {
-    switch (string[0]) {
-      case 'R':
-        Serial_input[0] = val;
-        break;
-      case 'P':
-        Serial_input[1] = val;
-        break;
-      case 'Y':
-        Serial_input[2] = val;
-        break;
-      case 'T':
-        Serial_input[3] = val;
-        break;
-    }
+  if(val > 1000 && val < 2000){
+  switch (string[0]) {
+    case 'R':
+      Serial_input[0] = val;
+      break;
+    case 'P':
+      Serial_input[1] = val;
+      break;
+    case 'Y':
+      Serial_input[2] = val;
+      break;
+    case 'T':
+      Serial_input[3] = val;
+      break;
+  }
   }
 }
