@@ -62,6 +62,7 @@ int Serial_input[4] = {0, 0, 0, 0};
 char string[5]      = "00000";
 int val             = 0;
 int sign = 1;
+int data_flag = 0;
 
 float roll, pitch, yaw, yaw_previous, yaw_difference, last_yaw;
 
@@ -129,7 +130,7 @@ void loop() {
   /*Used for timing*/
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
-
+  data_flag = 0;
   /*The differet flight modes implemented*/
   switch (flightMode) {
     case 0:
@@ -156,7 +157,7 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-    data_vector();
+    if (data_flag == 0)data_vector();
   }
 }
 
