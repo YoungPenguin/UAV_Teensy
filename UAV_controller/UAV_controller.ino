@@ -22,6 +22,7 @@ Madgwick filter; // using the madgwick algo - change to mahony if you have probl
 void Transmitter();
 float Yaw_counter(float yaw_difference);
 void PC_input();
+void 3DofPID();
 
 /* Add differet fligth modes */
 void flightMode0(); // dis-armed

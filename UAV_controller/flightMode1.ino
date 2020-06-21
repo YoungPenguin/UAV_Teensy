@@ -4,13 +4,15 @@ void flightMode1() {
     PORTB &= B11011111;
   }
 
-  if (!(input_pin[0] > 1000)) {stopAll();}
+  if (!(input_pin[0] > 1000)) {
+    stopAll();
+  }
 
   PC_input();
   // Read the motion sensors
   imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
   // Update the SensorFusion filter
-  filter.update(gx, gy, gz, ax, ay, az, mx, my, mz); // madgwick 
+  filter.update(gx, gy, gz, ax, ay, az, mx, my, mz); // madgwick
   roll = filter.getRoll();
   pitch = filter.getPitch();
   yaw = filter.getYaw();
@@ -33,34 +35,7 @@ void flightMode1() {
   error[2] = (input_pin[4] < 1500) ? (total_yaw - (desired_angle[2] + Serial_input[2])) : (total_yaw - (desired_angle[2]));
   /* Switch for the serial input - Gain full manual control when switch 7 is set */
 
-  /* 3x PID - [roll, pitch, yaw] = [0,1,2] */
-  P_term[0] = roll_pid_values[0] * error[0];
-  P_term[1] = pitch_pid_values[0] * error[1];
-  P_term[2] = yaw_pid_values[0] * error[2];
-
-  I_term[0] = old_I_term[0] + roll_pid_values[1] * error[0] * T;
-  I_term[1] = old_I_term[1] + pitch_pid_values[1] * error[1] * T;
-  I_term[2] = old_I_term[2] + yaw_pid_values[1] * error[2] * T;
-
-  D_term[0] = roll_pid_values[2] * (error[0] - old_error[0]) / T;
-  D_term[1] = pitch_pid_values[2] * (error[1] - old_error[1]) / T;
-  D_term[2] = yaw_pid_values[2] * (error[2] - old_error[2]) / T;
-
-  PID_output[0] = P_term[0] + I_term[0] + D_term[0];
-  PID_output[1] = P_term[1] + I_term[1] + D_term[1];
-  PID_output[2] = P_term[2] + I_term[2] + D_term[2];
-
-  old_error[0] = error[0];
-  old_error[1] = error[1];
-  old_error[2] = error[2];
-  old_I_term[0] = I_term[0];
-  old_I_term[1] = I_term[1];
-  old_I_term[2] = I_term[2];
-
-  PID_output[0] = anti_windup(PID_output[0], -400, 400);
-  PID_output[1] = anti_windup(PID_output[1], -400, 400);
-  PID_output[2] = anti_windup(PID_output[2], -400, 400);
-  /* 3x PID - [roll, pitch, yaw] = [0,1,2] */
+  3DofPID();
 
   throttle = (input_pin[4] < 1500) ? Serial_input[3] + input_pin[0] : input_pin[0];
   MotorMix_HEX(throttle, PID_output[0], PID_output[1], PID_output[2]);
