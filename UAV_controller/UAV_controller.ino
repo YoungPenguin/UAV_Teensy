@@ -171,10 +171,12 @@ int anti_windup(float a, float b, float c) {
 void stopAll() {
   for (int thisProp = 0; thisProp < pinCount; thisProp++) {
     Propeller[thisProp].writeMicroseconds(1000);
+    int thisInput = anti_windup(thisProp, 0, 3);
+    Serial_input[thisInput] = 0;
+    int thisIterm = anti_windup(thisProp, 0, 2);
+    I_term[thisIterm]       = 0;
   }
-  I_term[0]        = 0;
-  I_term[1]        = 0;
-  I_term[2]        = 0;
+
   total_yaw        = 0;
   desired_angle[2] = 0;
 }

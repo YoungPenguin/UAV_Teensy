@@ -30,10 +30,9 @@ void PC_input() {
         Serial_input[3] = ((val >= 0) && (val < 1000)) ? val : 0;
         break;
       default:
-        Serial_input[0] = 0;
-        Serial_input[1] = 0;
-        Serial_input[2] = 0;
-        Serial_input[3] = 0;
+        for (int thisInput = 0; thisInput < 4; thisInput++) {
+          Serial_input[thisInput] = 0;
+        }
         break;
     }
   }
