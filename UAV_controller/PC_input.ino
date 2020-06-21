@@ -19,7 +19,6 @@ void PC_input() {
     switch (string[0]) {
       case 'R':
         Serial_input[0] = ((val > -20) && (val < 20)) ? val : 0;
-        Serial.println(Serial_input[0]);
         break;
       case 'P':
         Serial_input[1] = ((val > -20) && (val < 20)) ? val : 0;
