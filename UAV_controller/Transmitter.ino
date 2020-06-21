@@ -45,16 +45,16 @@ void blink() {
     last_CH_state[3] = 0;
     input_pin[3] = counter[5] - counter[3];
   }
-  ///////////////////////////////////////Channel 5
+  ///////////////////////////////////////Channel 7
   if (GPIOC_PDIR & 2) { //pin 22 (1B 16)
 
     if (last_CH_state[4] == 0) {
-      last_CH_state[4] = 1;        //Store the current state into the last state for the next loop
-      counter[4] = counter[5]; //Set counter_1 to current value.
+      last_CH_state[4] = 1;       
+      counter[4] = counter[5];
     }
   }
   else if (last_CH_state[4] == 1) {
-    last_CH_state[4] = 0;                     //Store the current state into the last state for the next loop
-    input_pin[4] = counter[5] - counter[4]; //We make the time difference. Channel 1 is current_time - timer_1.
+    last_CH_state[4] = 0;                   
+    input_pin[4] = counter[5] - counter[4]; 
   }
 }

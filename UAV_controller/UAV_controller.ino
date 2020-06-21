@@ -156,7 +156,7 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-    //data_vector();
+    data_vector();
   }
 }
 
@@ -174,7 +174,7 @@ void stopAll() {
     int thisInput = anti_windup(thisProp, 0, 3);
     Serial_input[thisInput] = 0;
     int thisIterm = anti_windup(thisProp, 0, 2);
-    I_term[thisIterm]       = 0;
+    I_term[thisIterm] = 0;
   }
 
   total_yaw        = 0;
