@@ -59,7 +59,7 @@ float total_yaw             = 0.0;
 
 /*PC input with serial check PC_input for the commands*/
 int Serial_input[4] = {0, 0, 0, 0};
-char string[5]      = {'0', '0', '0', '0'};
+char string[5]      = "00000";
 int val             = 0;
 int sign = 1;
 
@@ -156,7 +156,7 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-    data_vector();
+    //data_vector();
   }
 }
 

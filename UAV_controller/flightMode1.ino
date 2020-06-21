@@ -3,14 +3,14 @@ void flightMode1() {
     flightMode = 0;
     PORTB &= B11011111;
   }
-  if (!(input_pin[0] > 1000)) {
-    stopAll();
-  }
+
+  if (!(input_pin[0] > 1000)) {stopAll();}
+
   PC_input();
   // Read the motion sensors
   imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
   // Update the SensorFusion filter
-  filter.update(gx, gy, gz, ax, ay, az, mx, my, mz);
+  filter.update(gx, gy, gz, ax, ay, az, mx, my, mz); // madgwick 
   roll = filter.getRoll();
   pitch = filter.getPitch();
   yaw = filter.getYaw();
@@ -19,6 +19,7 @@ void flightMode1() {
   yaw_previous = yaw;
   total_yaw = Yaw_counter(yaw_difference);
 
+  /* Don't use the map function, this will give a bad input resolution. Do this instead*/
   desired_angle[0]  = (input_pin[1] - 1500.0) / 100.0;
   desired_angle[1]  = (input_pin[2] - 1500.0) / 100.0;
   desired_angle[2]  = (input_pin[3] - 1500.0) / 5000.0;
@@ -32,7 +33,7 @@ void flightMode1() {
   error[2] = (input_pin[4] < 1500) ? (total_yaw - (desired_angle[2] + Serial_input[2])) : (total_yaw - (desired_angle[2]));
   /* Switch for the serial input - Gain full manual control when switch 7 is set */
 
-  /*3x PID*/
+  /* 3x PID - [roll, pitch, yaw] = [0,1,2] */
   P_term[0] = roll_pid_values[0] * error[0];
   P_term[1] = pitch_pid_values[0] * error[1];
   P_term[2] = yaw_pid_values[0] * error[2];
@@ -59,7 +60,8 @@ void flightMode1() {
   PID_output[0] = anti_windup(PID_output[0], -400, 400);
   PID_output[1] = anti_windup(PID_output[1], -400, 400);
   PID_output[2] = anti_windup(PID_output[2], -400, 400);
-  /*3x PID*/
+  /* 3x PID - [roll, pitch, yaw] = [0,1,2] */
+
   throttle = (input_pin[4] < 1500) ? Serial_input[3] + input_pin[0] : input_pin[0];
   MotorMix_HEX(throttle, PID_output[0], PID_output[1], PID_output[2]);
 }
