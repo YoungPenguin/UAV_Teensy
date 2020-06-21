@@ -20,6 +20,7 @@ This project will be made highly scaleble, so it's not restricted to a Hexacopte
 # Files 
 - 3 DoF UAV - Template 
 - 6 DoF UAV control - Folder "GPS" including the World to body conversion block as separate component this will make it very easy for you to impelement different features like "home lock" "return to home" "switch coordinate system" and so on... 
+When adding new functionality to the flight controller please do it with some kind of modular software architecture approach. And ofc SHARE IT!!! :D
 
 ## simulations files 
 If you have a valid matlab licence you can use:
