@@ -1,7 +1,7 @@
 void flightMode1() {
   if ((input_pin[0] < 1000) && (input_pin[1] > 1700) && (input_pin[2] > 1700) && (input_pin[3] > 1700)) {
     flightMode = 0;
-    digitalWrite(13, LOW);
+    PORTB &= B11011111;
   }
   if (!(input_pin[0] > 1000)) {
     stopAll();
