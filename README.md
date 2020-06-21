@@ -40,7 +40,7 @@ UAV specs:
 
 - Configuration: hex x copter
 - Weight without batteries: 2000g
-- Arm length: 400mm
+- Arm length: 350mm
 
 ## secondary UAV test
 Hardware:
