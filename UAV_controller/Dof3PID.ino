@@ -1,4 +1,4 @@
-void 3DofPID() {
+void Dof3PID() {
   /* 3x PID - [roll, pitch, yaw] = [0,1,2] */
   P_term[0] = roll_pid_values[0] * error[0];
   P_term[1] = pitch_pid_values[0] * error[1];

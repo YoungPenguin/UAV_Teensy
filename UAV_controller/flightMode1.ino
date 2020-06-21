@@ -35,7 +35,7 @@ void flightMode1() {
   error[2] = (input_pin[4] < 1500) ? (total_yaw - (desired_angle[2] + Serial_input[2])) : (total_yaw - (desired_angle[2]));
   /* Switch for the serial input - Gain full manual control when switch 7 is set */
 
-  3DofPID();
+  Dof3PID();
 
   throttle = (input_pin[4] < 1500) ? Serial_input[3] + input_pin[0] : input_pin[0];
   MotorMix_HEX(throttle, PID_output[0], PID_output[1], PID_output[2]);
