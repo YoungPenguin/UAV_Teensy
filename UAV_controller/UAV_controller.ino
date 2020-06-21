@@ -94,8 +94,9 @@ void setup() {
   pinMode(22, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(22), blink, CHANGE); //resset pin
 
-  DDRB |= B00100000;  //D13 as output
-  PORTB &= B11011111; //D13 set to LOW
+  /* LED used for mode indicator */
+  DDRB |= B00100000;
+  PORTB &= B11011111;
 
   Propeller[0].attach(3);
   Propeller[1].attach(7);
@@ -153,10 +154,9 @@ void loop() {
   }
 
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-  //Serial.println(cycles);
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-    //data_vector();
+    data_vector();
   }
 }
 
