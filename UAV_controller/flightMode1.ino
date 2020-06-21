@@ -60,6 +60,7 @@ void flightMode1() {
   PID_output[1] = anti_windup(PID_output[1], -400, 400);
   PID_output[2] = anti_windup(PID_output[2], -400, 400);
   /*3x PID*/
-
-  MotorMix_HEX(input_pin[0], PID_output[0], PID_output[1], PID_output[2]);
+  throttle = (input_pin[4] < 1500) ? Serial_input[3] + input_pin[0] : input_pin[0];
+  Serial.println(throttle);
+  MotorMix_HEX(throttle, PID_output[0], PID_output[1], PID_output[2]);
 }

@@ -23,5 +23,5 @@ void data_vector() {
   Serial.print(",");
   Serial.print(PID_output[1]);
   Serial.print(",");
-  Serial.println(PID_output[2]);
+  Serial.print(PID_output[2]);
 }

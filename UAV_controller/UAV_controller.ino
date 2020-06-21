@@ -45,6 +45,7 @@ int flightMode = 0;
 unsigned long counter[6];
 byte last_CH_state[5];
 int input_pin[5];
+int throttle = 0;
 
 /*{Kp, Ki, Kd}*/
 float roll_pid_values[3]    = {0.7, 0.6, 0.15};
