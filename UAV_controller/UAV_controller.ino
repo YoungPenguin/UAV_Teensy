@@ -88,6 +88,7 @@ void setup() {
 
   Serial.begin(9600);
   Serial.setTimeout(1); // the timeout for serial.read is standard @ 1000 - we don't want that
+
   for (int thisPin = 14; thisPin < 18; thisPin++) {
     pinMode(thisPin, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(thisPin), blink, CHANGE);
@@ -96,7 +97,7 @@ void setup() {
   pinMode(22, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(22), blink, CHANGE); //resset pin
 
-  /* LED used for mode indicator */
+  /* LED 13 used for flight mode indicator */
   DDRB |= B00100000;
   PORTB &= B11011111;
 
@@ -132,6 +133,7 @@ void loop() {
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
   data_flag = 0;
+
   /*The differet flight modes implemented*/
   switch (flightMode) {
     case 0:
