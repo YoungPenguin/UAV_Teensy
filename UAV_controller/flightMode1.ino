@@ -24,6 +24,7 @@ void flightMode1() {
   /* Don't use the map function, this will give a bad input resolution. Do this instead*/
   desired_angle[0]  = (input_pin[1] - 1500.0) / 100.0;
   desired_angle[1]  = (input_pin[2] - 1500.0) / 100.0;
+  
   desired_angle[2]  = (input_pin[3] - 1500.0) / 5000.0;
   desired_angle[2] += last_yaw;
 
