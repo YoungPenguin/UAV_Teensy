@@ -83,7 +83,7 @@ boolean failsafe_flag = false;
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.setTimeout(1); // the timeout for serial.read is standard @ 1000 - we don't want that
   for (int thisPin = 14; thisPin < 18; thisPin++) {
     pinMode(thisPin, INPUT_PULLUP);
@@ -155,7 +155,7 @@ void loop() {
   //Serial.println(cycles);
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-    data_vector();
+   // data_vector();
   }
 }
 

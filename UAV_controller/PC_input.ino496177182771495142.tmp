@@ -14,27 +14,37 @@ void PC_input() {
     int temp1   = (int)string[4] - 48;
 
     sign = (string[1] == '-') ? -1 : 1;
-    val = ((temp100 * 100) + (temp10 * 10) + temp1) * sign;
 
+    val = ((temp100 * 100) + (temp10 * 10) + temp1) * sign;
+    Serial.println(val);
+    Roll_bool = (val < 20);
     switch (string[0]) {
       case 'R':
-        Serial_input[0] = ((val > -20) && (val < 20)) ? val : 0;
-        Serial.println(Serial_input[0]);
+        Serial_input[0] = Roll_bool ? val : 0;
+        Serial.print(Serial_input[0]);
+        Serial.println(Roll_bool);
         break;
       case 'P':
-        Serial_input[1] = ((val > -20) && (val < 20)) ? val : 0;
+        Serial_input[1] = (val > -20 || val < 20) ? val : 0;
+        Serial.print(Serial_input[1]);
+        Serial.println("P");
         break;
       case 'Y':
-        Serial_input[2] = ((val > -360) && (val < 360)) ? val : 0;
+        Serial_input[2] = (val > -360 || val < 360) ? val : 0;
+        Serial.print(Serial_input[2]);
+        Serial.println("Y");
         break;
       case 'T':
-        Serial_input[3] = ((val >= 0) && (val < 1000)) ? val : 0;
+        Serial_input[3] = (val >= 0 || val < 1000) ? val : 0;
+        Serial.print(Serial_input[3]);
+        Serial.println("T");
         break;
       default:
         Serial_input[0] = 0;
         Serial_input[1] = 0;
         Serial_input[2] = 0;
         Serial_input[3] = 0;
+        Serial.println("nononno");
         break;
     }
   }
