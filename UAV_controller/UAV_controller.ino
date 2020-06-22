@@ -1,11 +1,3 @@
-/*
-         UAV-configuration:
-           3-cw  4-ccw
-        2-ccw        5-cw
-           1-cw  6-ccw
-              (front)
-*/
-
 #include <Servo.h>
 #include <NXPMotionSense.h>
 #include <MadgwickAHRS.h>
@@ -28,7 +20,7 @@ void Dof3PID();
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
-// void flightMode3(); // Altitude - no thx
+// void flightMode3(); // Altitude 
 // void flightMode4(); // GPS hold
 
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
