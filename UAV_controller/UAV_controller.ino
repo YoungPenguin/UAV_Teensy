@@ -20,11 +20,10 @@ void Dof3PID();
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
-// void flightMode3(); // Altitude 
+// void flightMode3(); // Altitude
 // void flightMode4(); // GPS hold
 
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
-#define T 0.0025
 #define loop_time 450000 //45000=2.5ms  // 36000=2ms
 #define pinCount 6
 
@@ -41,9 +40,9 @@ int input_pin[5];
 int throttle = 0;
 
 /*{Kp, Ki, Kd}*/
-float roll_pid_values[3]    = {0.7, 0.6, 0.15};
-float pitch_pid_values[3]   = {0.6, 0.6, 0.1};
-float yaw_pid_values[3]     = {2.0, 0.5, 1.0};
+float roll_pid_values[3]    = {1.3, 0.02, 28.0};
+float pitch_pid_values[3]   = {1.3, 0.04, 28.0};
+float yaw_pid_values[3]     = {7.0, 0.5, 10.0};
 
 /*Controller inputs*/
 float desired_angle[3]      = {0.0, 0.0, 0.0};
@@ -52,8 +51,8 @@ float total_yaw             = 0.0;
 
 /*PC input with serial check PC_input for the commands*/
 int Serial_input[4] = {0, 0, 0, 0};
-char string[5]      = "00000";
-int val             = 0;
+char string[5];
+int val  = 0;
 int sign = 1;
 int data_flag = 0;
 
@@ -62,10 +61,10 @@ float roll, pitch, yaw, yaw_previous, yaw_difference, last_yaw;
 float PID_output[3];
 float error[3];
 float old_error[3];
-float P_term[3]     = {0, 0, 0};
-float I_term[3]     = {0, 0, 0};
-float old_I_term[3] = {0, 0, 0};
 float D_term[3]     = {0, 0, 0};
+float roll_pid_i = 0;
+float pitch_pid_i = 0;
+float yaw_pid_i = 0;
 
 /*Prop shield varibles*/
 float ax, ay, az;
@@ -152,7 +151,8 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-    if (data_flag == 0)data_vector();
+   // if (data_flag == 0)data_vector();
+   Serial.println(PID_output[1]);
   }
 }
 
@@ -169,10 +169,11 @@ void stopAll() {
     Propeller[thisProp].writeMicroseconds(1000);
     int thisInput = anti_windup(thisProp, 0, 3);
     Serial_input[thisInput] = 0;
-    int thisIterm = anti_windup(thisProp, 0, 2);
-    I_term[thisIterm] = 0;
-  }
 
+  }
+  roll_pid_i = 0;
+  pitch_pid_i = 0;
+  yaw_pid_i = 0;
   total_yaw        = 0;
   desired_angle[2] = 0;
 }
