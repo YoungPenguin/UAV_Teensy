@@ -15,6 +15,7 @@ void Transmitter();
 float Yaw_counter(float yaw_difference);
 void PC_input();
 void Dof3PID();
+void flightmodes();
 
 /* Add differet fligth modes */
 void flightMode0(); // dis-armed
@@ -22,7 +23,7 @@ void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
 // void flightMode3(); // Altitude
 // void flightMode4(); // GPS hold
-
+int flightflag = 0;
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
 #define loop_time 450000 //45000=2.5ms  // 36000=2ms
 #define pinCount 6
@@ -30,9 +31,6 @@ void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); 
 // total number of motors
 Servo Propeller[pinCount];
 float pwm_[pinCount] = {0.0, 0.0, 0.0};
-
-// inizial flight mode
-int flightMode = 0;
 
 unsigned long counter[6];
 byte last_CH_state[5];
@@ -73,9 +71,6 @@ float mx, my, mz;
 
 // timing the code
 volatile int cycles;
-boolean failsafe_flag = false;
-
-
 
 void setup() {
 
@@ -124,86 +119,49 @@ void loop() {
   startCycleCPU = ARM_DWT_CYCCNT;
   data_flag = 0;
 
+  flightmodes();
+  
+  switch (flightflag) {
+    case 0:
+      flightMode0();
+      PORTB &= B11011111;
 
-  if (input_pin[0] < 1000) {
-    //   Serial.println("Stop all");
-    stopAll();
-    roll_pid_i = 0;
-    pitch_pid_i = 0;
-    yaw_pid_i = 0;
-    total_yaw = 0;
-    desired_angle[2] = 0;
-  }
-  //input_pin[0]> 1100
-  if ((input_pin[0] > 1100) && (imu.available())) { //(start==1)
-    // Read the motion sensors
-    imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
-    // Update the SensorFusion filter
-    filter.updateIMU(gx, gy, gz, ax, ay, az);
+      break;
+    case 1:
+      flightMode1();
+      PORTB |= B00100000;
 
-    roll = filter.getRoll();
-    pitch = filter.getPitch();
-    yaw = filter.getYaw();
-
-
-
-    /// yaw conuter
-    yaw_difference = (yaw_previous - yaw);
-
-    yaw = (yaw_difference < -20) ? 1 : yaw_difference;
-    yaw = (yaw_difference > 20) ? -1 : yaw_difference;
-    total_yaw += yaw;
-
-    yaw_previous = yaw;
-
-    /// yaw conuter
-
-    desired_angle[0]  = (input_pin[1] - 1500.0) / 100.0;
-    desired_angle[1]  = (input_pin[2] - 1500.0) / 100.0;
-
-    desired_angle[2]  = (input_pin[3] - 1500.0) / 5000.0;
-    desired_angle[2] += last_yaw;
-    last_yaw = desired_angle[2];
-
-    last_yaw = desired_angle[2];
-
-
-PC_input();
-    /* Switch for the serial input - Gain full manual control when switch 7 is set */
-    error[0] = 0;//(input_pin[4] < 1500) ? (roll - (desired_angle[0] + Serial_input[0])) : (roll - (desired_angle[0]));
-    error[1] = (input_pin[4] < 1500) ? (pitch - (desired_angle[1] + Serial_input[1])) : (pitch - (desired_angle[1]));
-    error[2] = 0;//(input_pin[4] < 1500) ? (total_yaw - (desired_angle[2] + Serial_input[2])) : (total_yaw - (desired_angle[2]));
-    /* Switch for the serial input - Gain full manual control when switch 7 is set */
-
-    Dof3PID();
-    
-    throttle = (input_pin[4] < 1500) ? Serial_input[3] + input_pin[0] : input_pin[0];
-    pwm_[0] = throttle  - PID_output[0] - 1.732 * PID_output[1] - PID_output[2];
-    pwm_[1] = throttle  - 0.5 * PID_output[0] + PID_output[2];
-    pwm_[2] = throttle  - PID_output[0] + 1.732 * PID_output[1] - PID_output[2];
-    pwm_[3] = throttle  + PID_output[0] + 1.732 * PID_output[1] + PID_output[2];
-    pwm_[4] = throttle  + 0.5 * PID_output[0] - PID_output[2];
-    pwm_[5] = throttle  + PID_output[0] - 1.732 * PID_output[1] + PID_output[2]; // roll, pitch, yaw
-
-    pwm_[0] = anti_windup(pwm_[0], 1000, 2000);
-    pwm_[1] = anti_windup(pwm_[1], 1000, 2000);
-    pwm_[2] = anti_windup(pwm_[2], 1000, 2000);
-    pwm_[3] = anti_windup(pwm_[3], 1000, 2000);
-    pwm_[4] = anti_windup(pwm_[4], 1000, 2000);
-    pwm_[5] = anti_windup(pwm_[5], 1000, 2000);
-
-    for (int Prop_PWM = 0; Prop_PWM < 6; Prop_PWM++) {
-      Propeller[Prop_PWM].writeMicroseconds(pwm_[Prop_PWM]);
-    }
-
+      break;
+    case 2:
+      failsafe();
+      break;
+    /*    case 3:
+          flightMode3();
+          float pressure = myPressure.readPressure();
+          float temperature = 25 + 273.15; // = myPressure.readTemp() + 273.15;
+          Height = -(log(pressure / 100900) * 8.3143 * temperature) / (0.28401072);
+          break;
+    */
+    default:
+      failsafe();
+      break;
   }
 
+Serial.print(input_pin[0]);
+Serial.print(", ");
+Serial.print(input_pin[1]);
+Serial.print(", ");
+Serial.print(input_pin[2]);
+Serial.print(", ");
+Serial.print(input_pin[3]);
+Serial.print(", ");
+Serial.println(input_pin[4]);
 
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   while (cycles < 180000) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
     // if (data_flag == 0)data_vector();
-    Serial.println(PID_output[1]);
+
   }
 }
 
@@ -222,9 +180,9 @@ void stopAll() {
     Serial_input[thisInput] = 0;
 
   }
-  roll_pid_i = 0;
+  roll_pid_i  = 0;
   pitch_pid_i = 0;
-  yaw_pid_i = 0;
-  total_yaw        = 0;
+  yaw_pid_i   = 0;
+  total_yaw   = 0;
   desired_angle[2] = 0;
 }

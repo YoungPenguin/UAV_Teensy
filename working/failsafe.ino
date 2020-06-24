@@ -3,9 +3,14 @@
    This has to be changed accordenly to your setup */
 
 void failsafe() {
-  /* This is setup on the taranis transmitter, it pulses 1000 to CH1 and 2000 to CH7 (5) which will shot-off all motors // this is the safest way for us, not the UAV
+  while (true) {
+    stopAll();
+    Serial.println("You are in Fail-Safe please restart your device and tjeck for damage!");
 
-    However depending on your project, you might have to set some logic in here. For example, puls the FC every 10ms and if no pulse is found go to fail safe
-
-  */
+    // the use of delay is only here because we are in an infinite loop so it does not matter... else it's a big nono
+    PORTB |= B00100000;
+    delay(500);
+    PORTB &= B11011111;
+    delay(500);
+  }
 }
