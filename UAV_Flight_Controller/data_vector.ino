@@ -17,7 +17,7 @@ void data_vector() {
   Serial.print(",");
   Serial.print(gy);
   Serial.print(",");
-  Serial.println(gz);
+  Serial.print(gz);
   Serial.print(",");
   Serial.print(PID_output[0]);
   Serial.print(",");
