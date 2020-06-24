@@ -1,6 +1,5 @@
 void flightMode0() {
   if (input_pin[0] < 1000) {
-    //   Serial.println("Stop all");
     stopAll();
     roll_pid_i = 0;
     pitch_pid_i = 0;

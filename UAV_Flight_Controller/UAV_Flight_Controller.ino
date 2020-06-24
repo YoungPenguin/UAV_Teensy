@@ -15,7 +15,7 @@ void Transmitter();
 float Yaw_counter(float yaw_difference);
 void PC_input();
 void Dof3PID();
-void flightmodes();
+int flightmodes();
 
 /* Add differet fligth modes */
 void flightMode0(); // dis-armed
@@ -23,7 +23,6 @@ void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
 // void flightMode3(); // Altitude
 // void flightMode4(); // GPS hold
-int flightflag = 0;
 void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
 #define loop_time 450000 //45000=2.5ms  // 36000=2ms
 #define pinCount 6
@@ -36,6 +35,7 @@ unsigned long counter[6];
 byte last_CH_state[5];
 int input_pin[5];
 int throttle = 0;
+int flightflag = 0;
 
 /*{Kp, Ki, Kd}*/
 float roll_pid_values[3]    = {1.3, 0.02, 28.0};
@@ -49,9 +49,7 @@ float total_yaw             = 0.0;
 
 /*PC input with serial check PC_input for the commands*/
 int Serial_input[4] = {0, 0, 0, 0};
-char string[5]      = "00000";
-int val             = 0;
-int sign = 1;
+
 int data_flag = 0;
 
 float roll, pitch, yaw, yaw_previous, yaw_difference, last_yaw;
@@ -119,8 +117,8 @@ void loop() {
   startCycleCPU = ARM_DWT_CYCCNT;
   data_flag = 0;
 
-  flightmodes();
-  
+  flightflag = flightmodes(flightflag, input_pin[0], input_pin[1], input_pin[2], input_pin[3]);
+
   switch (flightflag) {
     case 0:
       flightMode0();
@@ -146,16 +144,6 @@ void loop() {
       failsafe();
       break;
   }
-
-Serial.print(input_pin[0]);
-Serial.print(", ");
-Serial.print(input_pin[1]);
-Serial.print(", ");
-Serial.print(input_pin[2]);
-Serial.print(", ");
-Serial.print(input_pin[3]);
-Serial.print(", ");
-Serial.println(input_pin[4]);
 
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   while (cycles < 180000) {

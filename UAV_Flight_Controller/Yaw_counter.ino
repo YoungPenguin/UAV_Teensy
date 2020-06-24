@@ -1,6 +1,6 @@
-float Yaw_counter(float yaw_difference) {
-  yaw = (yaw_difference < -20) ? 1 : yaw_difference;
-  yaw = (yaw_difference > 20) ? -1 : yaw_difference;
+float Yaw_counter(float difference) {
+  yaw = (difference < -20) ? 1 : difference;
+  yaw = (difference > 20) ? -1 : difference;
   total_yaw += yaw;
   return total_yaw;
 }

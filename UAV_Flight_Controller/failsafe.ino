@@ -1,6 +1,8 @@
 /* Basic Receiver FAIL SAFE
    check for no new pulses
-   This has to be changed accordenly to your setup */
+   This has to be changed accordenly to your setup 
+   In this case the fail-safe is setup on the transmitter end
+                                                    */
 
 void failsafe() {
   while (true) {
@@ -9,8 +11,8 @@ void failsafe() {
 
     // the use of delay is only here because we are in an infinite loop so it does not matter... else it's a big nono
     PORTB |= B00100000;
-    delay(500);
+    delay(1000);
     PORTB &= B11011111;
-    delay(500);
+    delay(1000);
   }
 }
