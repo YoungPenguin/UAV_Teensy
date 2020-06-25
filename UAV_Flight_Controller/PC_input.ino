@@ -8,7 +8,7 @@
  * Roll    |  R+/-###  | +/- 20 deg
  * Pitch   |  P+/-###  | +/- 20 deg
  * Yaw     |  Y+/-###  | +/- 360 deg
- * Throttle|  T+/-###  | 0 =< # < 1000 us
+ * Throttle|  T+###    | 0 =< # < 1000 us
  * ---------------------------------------
  * 
  * If you don't follow this, all inputs will just be set to 0
