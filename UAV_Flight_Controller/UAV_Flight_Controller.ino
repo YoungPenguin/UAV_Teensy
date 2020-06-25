@@ -26,7 +26,6 @@ void Dof3PID();
 int flightmodes();
 void MotorMixHex();
 
-
 /* Add differet fligth modes */
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
@@ -35,7 +34,7 @@ void failsafe(); // fligthmode 2 = failsafe
 // void flightMode3(); // Altitude
 // void flightMode4(); // GPS hold
 
-#define loop_time 450000 //45000=2.5ms  // 36000=2ms
+#define loop_time 450000 //45000=2.5ms @ 180Mhz // 36000=2ms
 #define pinCount 6
 
 // total number of motors
@@ -163,13 +162,11 @@ void loop() {
   }
 
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-  while (cycles < 180000) {
+  while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
     // if (data_flag == 0)data_vector();
-
   }
 }
-
 
 ///////////////////////// just some handy functions /////////////////////////////////////////
 int anti_windup(float a, float b, float c) {
@@ -183,11 +180,11 @@ void stopAll() {
     Propeller[thisProp].writeMicroseconds(1000);
     int thisInput = anti_windup(thisProp, 0, 3);
     Serial_input[thisInput] = 0;
-
   }
-  roll_pid_i  = 0;
-  pitch_pid_i = 0;
-  yaw_pid_i   = 0;
-  total_yaw   = 0;
+  
+  roll_pid_i       = 0;
+  pitch_pid_i      = 0;
+  yaw_pid_i        = 0;
+  total_yaw        = 0;
   desired_angle[2] = 0;
 }

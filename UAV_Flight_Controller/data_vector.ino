@@ -4,6 +4,8 @@
  *  Here you can put the data you want to print
  *  The data_flag in the buttom is just so you only get 
  *  1 data vector per loop :)
+ *  And oh year, if you are the type of person who uses printf... don't. 
+ *  it taks about 6 times as long to do. You can use \n as end if you like, there rly no difference
 */
 
 void data_vector() {
