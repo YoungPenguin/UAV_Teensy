@@ -1,3 +1,11 @@
+/*
+ * hello there stranger!
+ * I see you have found the flight controller, i must say you have very good tast.
+ * This is the main file, here you can input the flightmodes you have implementet
+ * down in the switch case. Or ofc just use it as is!
+ * Hope you enjoy it 
+*/
+
 #include <Servo.h>
 #include <NXPMotionSense.h>
 #include <MadgwickAHRS.h>
@@ -16,14 +24,17 @@ float Yaw_counter(float yaw_difference);
 void PC_input();
 void Dof3PID();
 int flightmodes();
+void MotorMixHex();
+
 
 /* Add differet fligth modes */
 void flightMode0(); // dis-armed
 void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
+
 // void flightMode3(); // Altitude
 // void flightMode4(); // GPS hold
-void MotorMix_HEX(float input, float roll_PID, float pitch_PID, float yaw_PID); // replace the motor mix with the UAV configuration you are working with
+
 #define loop_time 450000 //45000=2.5ms  // 36000=2ms
 #define pinCount 6
 
@@ -111,11 +122,17 @@ void setup() {
     myPressure.setOversampleRate(1); // Set Oversample to the recommended 128
     myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
   */
-}
+  while (!(imu.available())); // to make sure the hardware it rdy 2 go
+  }
 void loop() {
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
   data_flag = 0;
+
+  // Read the motion sensors
+  imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
+  // Update the SensorFusion filter
+  filter.updateIMU(gx, gy, gz, ax, ay, az);
 
   flightflag = flightmodes(flightflag, input_pin[0], input_pin[1], input_pin[2], input_pin[3]);
 

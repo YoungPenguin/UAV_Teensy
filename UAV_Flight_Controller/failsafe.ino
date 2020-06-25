@@ -1,8 +1,8 @@
-/* Basic Receiver FAIL SAFE
-   check for no new pulses
-   This has to be changed accordenly to your setup 
-   In this case the fail-safe is setup on the transmitter end
-                                                    */
+/* 
+ *  Basic Receiver FAIL SAFE
+ *  This has to be changed accordenly to your setup 
+ *  In this case the fail-safe is setup on the transmitter side
+ */
 
 void failsafe() {
   while (true) {

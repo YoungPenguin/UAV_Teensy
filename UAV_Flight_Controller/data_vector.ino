@@ -1,3 +1,11 @@
+/* 
+ *  Hello there, 
+ *  I see you have found your way to the data vector
+ *  Here you can put the data you want to print
+ *  The data_flag in the buttom is just so you only get 
+ *  1 data vector per loop :)
+*/
+
 void data_vector() {
   Serial.print(micros());
   Serial.print(",");

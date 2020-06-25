@@ -1,3 +1,7 @@
+/*
+ * The PID control for roll, pitch, yaw
+*/
+
 void Dof3PID() {
   /* 3x PID - [roll, pitch, yaw] = [0,1,2] */
   roll_pid_i += (roll_pid_values[1] * error[0]);
