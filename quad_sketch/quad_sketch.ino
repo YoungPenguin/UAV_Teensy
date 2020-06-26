@@ -142,8 +142,8 @@ void loop() {
     pitch = filter.getPitch();
     yaw = filter.getYaw();
 
-    roll = roll - 2.2;
-    pitch = pitch - 2.74;
+    roll = roll;
+    pitch = pitch;
 
     yaw_difference = (yaw_previous - yaw);
     yaw_previous = yaw;
@@ -168,7 +168,7 @@ void loop() {
       pitch_desired_angle = 10;
     }
 
-    yaw_desired_angle_set = map(input_YAW, 1000, 2000, -2, 2);
+    yaw_desired_angle_set = map(input_YAW, 1000, 2000, -5, 5);
     yaw_desired_angle_set = yaw_desired_angle_set / 10;
     yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
 

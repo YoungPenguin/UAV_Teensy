@@ -24,7 +24,9 @@ float Yaw_counter(float yaw_difference);
 void PC_input();
 void Dof3PID();
 int flightmodes();
+
 void MotorMixHex();
+// void MotorMixQuad();
 
 /* Add differet fligth modes */
 void flightMode0(); // dis-armed
