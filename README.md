@@ -5,7 +5,7 @@ If you want to use this software please "fork" and "star" this project to make s
 
 ****description comming a little bit after the end of this project: 26/6/2020, just need to vibe a little then its comming. Latest start August***
 
-And for all my embedded systems dudes who loves assembly - this Flight controller will be witten in RISC-V and ARM: Latest start August! 
+And for all my embedded systems dudes - this Flight controller will be witten in pure C: Latest start August! 
 
 ***IMPORTANT!!!***
  - ***Make sure all inputs and sensors are set in the same direction as the code is written***
