@@ -1,11 +1,12 @@
 # UAV_Teensy
+For all my embedded systems dudes - this Flight controller will be witten in ***pure C***: Latest start August! 
+
 Please make sure to read the entire README.md file **BEFORE** doing anything. Thank you!
 
 If you want to use this software please "fork" and "star" this project to make sure your version doesn't change and to get notified of any updates. Feel free to report issues to be fixed. Enjoy
 
 ****description comming a little bit after the end of this project: 26/6/2020, just need to vibe a little then its comming. Latest start August***
 
-And for all my embedded systems dudes - this Flight controller will be witten in pure C: Latest start August! 
 
 ***IMPORTANT!!!***
  - ***Make sure all inputs and sensors are set in the same direction as the code is written***
