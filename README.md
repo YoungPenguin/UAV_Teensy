@@ -36,6 +36,8 @@ Hardware:
 - Taranis Transmitter/ reciver
 - Propeller: carbon 13.5x5.5
 - Motor: turnigy 3508-700
+- 4s 5000mAh
+- hobbywing x-rotor 40A 2-6S Lipo (No BEC)
 
 UAV specs:
 
@@ -45,12 +47,19 @@ UAV specs:
 
 ## secondary UAV test
 Hardware:
-- Teensy 3.6
+- Teensy 3.5
 - teensy prop shield
+- Taranis Transmitter/ reciver
+- Propeller: carbon 10x4.5
+- Motor: turnigy 3508-700
+- 4s 5000mAh
+- hobbywing x-rotor 40A 2-6S Lipo (No BEC)
 
 UAV specs:
 
 - Configuration: quad x copter
+- Weight without batteries: 1400g
+- Arm length: 250mm
 
 
 Data processing tools used:
