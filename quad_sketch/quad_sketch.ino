@@ -53,7 +53,7 @@ float roll_pid_d = 0;
 ///////////////////////////////ROLL PID CONSTANTS////////////////////
 float roll_kp = 1.3;         //3.55, (1.2)
 float roll_ki = 0.04;       //0.003, (0.038)
-float roll_kd = 32;//.2;         //2.05, 15, 36, (29)
+float roll_kd = 27;//.2;         //2.05, 15, 36, (29)
 float roll_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR PITCH//////////////////////////
@@ -64,7 +64,7 @@ float pitch_pid_d = 0;
 ///////////////////////////////PITCH PID CONSTANTS///////////////////
 float pitch_kp = 1.3;       //1.33 , (1.25), 0.55
 float pitch_ki = 0.04;       //0.043
-float pitch_kd = 26;//      //32
+float pitch_kd = 27;//      //32
 float pitch_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR YAW//////////////////////////
@@ -98,7 +98,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(22), blink, CHANGE); //resset pin
 
   DDRB |= B00100000;  //D13 as output
-  PORTB &= B11011111; //D13 set to LOW
+  PORTB &= B00100000; //D13 set to LOW
 
   prop__1.attach(5);
   prop__2.attach(4);
@@ -274,7 +274,7 @@ void blink() {
   else if (last_CH3_state == 1) {
     last_CH3_state = 0;
     input_PITCH = current_count - counter_3;
-    input_PITCH = input_PITCH-300;                //outcomment for step
+    input_PITCH = input_PITCH;                //outcomment for step
   }
   ///////////////////////////////////////Channel 4
   if (GPIOD_PDIR & 2) { //pin 14
