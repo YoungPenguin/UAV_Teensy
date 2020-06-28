@@ -5,7 +5,7 @@ Please make sure to read the entire README.md file **BEFORE** doing anything. Th
 
 If you want to use this software please "fork" and "star" this project to make sure your version doesn't change and to get notified of any updates. Feel free to report issues to be fixed. Enjoy
 
-****description comming a little bit after the end of this project: 26/6/2020, just need to vibe a little then its comming. Latest start August***
+****description comming a little bit after the end of this project: 5/7/2020, just need to vibe a little then its comming. Latest start August***
 
 
 ***IMPORTANT!!!***
