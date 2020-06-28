@@ -51,9 +51,9 @@ float roll_pid_p = 0;
 float roll_pid_i = 0;
 float roll_pid_d = 0;
 ///////////////////////////////ROLL PID CONSTANTS////////////////////
-float roll_kp = 1.3;         //3.55, (1.2)
-float roll_ki = 0.04;       //0.003, (0.038)
-float roll_kd = 27;//.2;         //2.05, 15, 36, (29)
+float roll_kp = 0.8;         //3.55, (1.2)
+float roll_ki = 0.06;       //0.003, (0.038)
+float roll_kd = 18;//.2;         //2.05, 15, 36, (29)
 float roll_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR PITCH//////////////////////////
@@ -62,9 +62,9 @@ float pitch_pid_p = 0;
 float pitch_pid_i = 0;
 float pitch_pid_d = 0;
 ///////////////////////////////PITCH PID CONSTANTS///////////////////
-float pitch_kp = 1.3;       //1.33 , (1.25), 0.55
-float pitch_ki = 0.04;       //0.043
-float pitch_kd = 27;//      //32
+float pitch_kp = 0.8;       //1.33 , (1.25), 0.55
+float pitch_ki = 0.06;       //0.043
+float pitch_kd = 18;//      //32
 float pitch_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR YAW//////////////////////////
@@ -173,9 +173,14 @@ void loop() {
     yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
 
     /*///////////////////////////P I D///////////////////////////////////*/
-    roll_error = roll - roll_desired_angle;
+    roll_error = 0;roll - roll_desired_angle;
     pitch_error = pitch - pitch_desired_angle;
-    yaw_error = total_yaw - yaw_desired_angle;
+    yaw_error = 0;total_yaw - yaw_desired_angle;
+
+if(input_ROLL<1800){
+  pitch_error = 10;
+  }
+
 
     roll_pid_i += (roll_ki * roll_error);
     pitch_pid_i += (pitch_ki * pitch_error);
@@ -220,16 +225,32 @@ void loop() {
   //maintain_loop_time();
   difference = micros() - main_loop_timer;
 
-  while (difference < 1000) {
-Serial.print(input_THROTTLE);
-Serial.print(", ");
-Serial.print(input_ROLL);
-Serial.print(", ");
-Serial.print(input_PITCH);
-Serial.print(", ");
-Serial.println(input_YAW);
-
-
+  while (difference < 2500) {
+ Serial.print(micros());
+  Serial.print(",");
+  Serial.print(roll);
+  Serial.print(",");
+  Serial.print(pitch);
+  Serial.print(",");
+  Serial.print(yaw);
+  Serial.print(",");
+  Serial.print(ax);
+  Serial.print(",");
+  Serial.print(ay);
+  Serial.print(",");
+  Serial.print(az);
+  Serial.print(",");
+  Serial.print(gx);
+  Serial.print(",");
+  Serial.print(gy);
+  Serial.print(",");
+  Serial.print(gz);
+  Serial.print(",");
+  Serial.print(pitch_PID);
+  Serial.print(",");
+  Serial.print(roll_PID);
+  Serial.print(",");
+  Serial.println(yaw_PID);
     difference = micros() - main_loop_timer;
   }
 
