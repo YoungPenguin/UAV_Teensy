@@ -182,9 +182,6 @@ void loop() {
     roll_desired_angle = map(input_ROLL, 1000, 2000, -10, 10);
     pitch_desired_angle = map(input_PITCH, 1000, 2000, -10, 10);
 
-    if ((input_RESET > 1500)) {      //step in pitch
-      pitch_desired_angle = 10;
-    }
 
     yaw_desired_angle_set = map(input_YAW, 1000, 2000, -5, 5);
     yaw_desired_angle_set = yaw_desired_angle_set / 10;
