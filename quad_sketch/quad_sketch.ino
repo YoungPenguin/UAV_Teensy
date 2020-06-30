@@ -8,12 +8,12 @@
               (front)
 
 
-              
-    
+
+
     pitch_PID = pitch_kp*pitch_error + pitch_ki/2*(pitch_error+pitch_previous_error)+old_I + 2*pitch_kd*(pitch_error-pitch_previous_error)-old_D;
     old_I = pitch_ki/2*(pitch_error+pitch_previous_error);
-    old_D = 2*pitch_kd*(pitch_error-pitch_previous_error); 
-    
+    old_D = 2*pitch_kd*(pitch_error-pitch_previous_error);
+
 
 
 
@@ -71,7 +71,7 @@ float roll_pid_d = 0;
 ///////////////////////////////ROLL PID CONSTANTS////////////////////
 float roll_kp = 1.3;         //3.55, (1.2)
 float roll_ki = 0.04;       //0.003, (0.038)
-float roll_kd = 32;//.2;         //2.05, 15, 36, (29)
+float roll_kd = 10;//.2;         //2.05, 15, 36, (29)
 float roll_desired_angle = 0; //This is the angle in which we whant the
 
 //////////////////////////////PID FOR PITCH//////////////////////////
@@ -82,9 +82,9 @@ float pitch_pid_d = 0;
 ///////////////////////////////PITCH PID CONSTANTS///////////////////
 float pitch_kp = 1.3;       //1.33 , (1.25), 0.55
 float pitch_ki = 0.04;       //0.043
-float pitch_kd = 26;//      //32
+float pitch_kd = 10.0;//      //32
 float pitch_desired_angle = 0; //This is the angle in which we whant the
-
+float pitch_old_I, pitch_old_D, roll_old_I, roll_old_D;
 //////////////////////////////PID FOR YAW//////////////////////////
 float yaw_PID, yaw_error, yaw_previous_error;
 float yaw_pid_p = 0;
@@ -195,17 +195,22 @@ void loop() {
     pitch_error = pitch - pitch_desired_angle;
     yaw_error = total_yaw - yaw_desired_angle;
 
-    roll_pid_i += (roll_ki * roll_error);
-    pitch_pid_i += (pitch_ki * pitch_error);
     yaw_pid_i += (yaw_ki * yaw_error);
-
-    roll_pid_i = anti_windup(roll_pid_i, -200, 200);
-    pitch_pid_i = anti_windup(pitch_pid_i, -200, 200);
-    yaw_pid_i = anti_windup(yaw_pid_i, -200, 200);
-
-    roll_PID = roll_kp * roll_error + roll_pid_i + roll_kd * ((roll_error - roll_previous_error) );
-    pitch_PID = pitch_kp * pitch_error + pitch_pid_i + pitch_kd * ((pitch_error - pitch_previous_error));
     yaw_PID = yaw_kp * yaw_error + yaw_pid_i + yaw_kd * ((yaw_error - yaw_previous_error));
+
+
+
+    pitch_PID = pitch_kp * pitch_error + pitch_ki / 2.0 * (pitch_error + pitch_previous_error) + pitch_old_I + 2.0 * pitch_kd * (pitch_error - pitch_previous_error) + pitch_old_D;
+    pitch_old_I = pitch_ki / 2.0 * (pitch_error + pitch_previous_error);
+    pitch_old_D = 2.0 * pitch_kd * (pitch_error - pitch_previous_error);
+
+
+    roll_PID  = roll_kp * roll_error + roll_ki / 2.0 * (roll_error + pitch_previous_error) + roll_old_I + 2.0 * roll_kd * (roll_error - roll_previous_error) + roll_old_D;
+    roll_old_I = roll_ki / 2.0 * (roll_error + roll_previous_error);
+    roll_old_D = 2.0 * roll_kd * (roll_error - roll_previous_error);
+
+
+
 
     pitch_previous_error = pitch_error;
     roll_previous_error = roll_error;
@@ -239,13 +244,10 @@ void loop() {
   difference = micros() - main_loop_timer;
 
   while (difference < 2500) {
-Serial.print(input_THROTTLE);
-Serial.print(", ");
-Serial.print(input_ROLL);
-Serial.print(", ");
-Serial.print(input_PITCH);
-Serial.print(", ");
-Serial.println(input_YAW);
+    Serial.print(input_THROTTLE);
+    Serial.print(", ");
+    Serial.println(input_ROLL);
+
 
 
     difference = micros() - main_loop_timer;
@@ -292,7 +294,7 @@ void blink() {
   else if (last_CH3_state == 1) {
     last_CH3_state = 0;
     input_PITCH = current_count - counter_3;
-    input_PITCH = input_PITCH-300;                //outcomment for step
+    input_PITCH = input_PITCH;              //outcomment for step
   }
   ///////////////////////////////////////Channel 4
   if (GPIOD_PDIR & 2) { //pin 14
