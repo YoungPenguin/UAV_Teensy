@@ -43,6 +43,8 @@ void failsafe(); // fligthmode 2 = failsafe
 Servo Propeller[pinCount];
 float pwm_[pinCount] = {0.0, 0.0, 0.0};
 
+bool mag = true;
+
 unsigned long counter[6];
 byte last_CH_state[5];
 int input_pin[5];
@@ -78,8 +80,6 @@ float yaw_pid_i = 0;
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
-bool mag = true;
-
 // timing the code
 volatile int cycles;
 
@@ -112,7 +112,7 @@ void setup() {
   }
 
   imu.begin();
-  filter.begin(400); // sample freq for prop shield
+  filter.begin(400); // sample freq for prop shield. 400Hz is max in hybrid mode
   // imu.setSeaPressure(98900);
 
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
@@ -135,23 +135,18 @@ void loop() {
   imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
   // Update the SensorFusion filter
 
-  mag ? filter.update(gx, gy, gz, ax, ay, az, mx, my, mz) : filter.updateIMU(gx, gy, gz, ax, ay, az);
+  mag ? filter.update(gx, gy, gz, ax, ay, az, mx, my, mz) : filter.updateIMU(gx, gy, gz, ax, ay, az); // switching between including/excluting magnetometer data
   
-  //filter.updateIMU(gx, gy, gz, ax, ay, az); // uden mag
-  //filter.update(gx, gy, gz, ax, ay, az, mx, my, mz); // med mag
-
   flightflag = flightmodes(flightflag, input_pin[0], input_pin[1], input_pin[2], input_pin[3]);
 
   switch (flightflag) {
     case 0:
       flightMode0();
       PORTB &= B11011111;
-
       break;
     case 1:
       flightMode1();
       PORTB |= B00100000;
-
       break;
     case 2:
       failsafe();

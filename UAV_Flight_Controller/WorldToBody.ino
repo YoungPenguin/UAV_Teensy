@@ -6,6 +6,6 @@
 */
 
 float WorldToBody(float & x_error, float & y_error, float Heading) {
-  x_error = x_error * cos(Heading) + y_error * sin(Heading);
+  x_error = x_error * cos(Heading) - y_error * sin(Heading);
   y_error = y_error * cos(Heading) + x_error * sin(Heading);
 }
