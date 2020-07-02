@@ -7,16 +7,6 @@
            1-cw  6-ccw
               (front)
 
-
-
-
-    pitch_PID = pitch_kp*pitch_error + pitch_ki/2*(pitch_error+pitch_previous_error)+old_I + 2*pitch_kd*(pitch_error-pitch_previous_error)-old_D;
-    old_I = pitch_ki/2*(pitch_error+pitch_previous_error);
-    old_D = 2*pitch_kd*(pitch_error-pitch_previous_error);
-
-
-
-
 */
 /*
          UAV-configuration:
@@ -100,6 +90,25 @@ float yaw_desired_angle_set = 0;
 float difference = 0;
 float main_loop_timer = 0;
 
+
+
+
+float PIDF_Tustin(float kp, float K1, float K2, float f, float error, float & old_error, float & old_I, float & old_Lead, float & PIDF_OUT);
+
+
+// set values
+#define T 0.0025
+#define alpha 0.1
+float tauD[3] = {0.04, 0.04, 0.04};
+float tauI[3] = {0.08, 0.08, 0.08};
+float kp[3] = {1.3, 1.3, 1.3};
+float K = 2 / T;
+float K1[3];
+float K2[3];
+float f[3];
+float previous_I[3] = {0.0, 0.0, 0.0};
+float previous_D[3] = {0.0, 0.0, 0.0};
+
 void setup() {
 
   Serial.begin(9600);
@@ -133,12 +142,33 @@ void setup() {
   imu.begin();
   filter.begin(100);
   // imu.setSeaPressure(98900);
+
+
+
+
+
+
+  // compute in setup
+  K1[0] = (-2 * alpha * tauD[0] + T ) / (2 * alpha * tauD[0] + T);
+  K1[1] = (-2 * alpha * tauD[1] + T) / (2 * alpha * tauD[1] + T);
+  K1[2] = (-2 * alpha * tauD[2] + T) / (2 * alpha * tauD[2] + T);
+
+  K2[0] = (2 * tauD[0] * kp[0]) / (2 * alpha * tauD[0] + T);
+  K2[1] = (2 * tauD[1] * kp[1]) / (2 * alpha * tauD[1] + T);
+  K2[2] = (2 * tauD[2] * kp[2]) / (2 * alpha * tauD[2] + T);
+
+  f[0] = (T / 2) * (kp[0] / tauI[0]);
+  f[1] = (T / 2) * (kp[1] / tauI[1]);
+  f[2] = (T / 2) * (kp[2] / tauI[2]);
+
+
 }
 void loop() {
   timePrev = time;
   time = millis();
   elapsedTime = (time - timePrev) / 1000;
 
+  Serial.println(roll_error);
 
   if (input_THROTTLE < 1000) {
     //   Serial.println("Stop all");
@@ -160,7 +190,7 @@ void loop() {
     pitch = filter.getPitch();
     yaw = filter.getYaw();
 
-    roll = roll;
+    roll = roll + 2.1;
     pitch = pitch;
 
     yaw_difference = (yaw_previous - yaw);
@@ -188,30 +218,19 @@ void loop() {
     yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
 
     /*///////////////////////////P I D///////////////////////////////////*/
-    roll_error = roll - roll_desired_angle;
+    roll_error = 0;//roll - roll_desired_angle;
     pitch_error = pitch - pitch_desired_angle;
-    yaw_error = total_yaw - yaw_desired_angle;
+    yaw_error = 0;//total_yaw - yaw_desired_angle;
 
     yaw_pid_i += (yaw_ki * yaw_error);
     yaw_PID = yaw_kp * yaw_error + yaw_pid_i + yaw_kd * ((yaw_error - yaw_previous_error));
 
 
 
-    pitch_PID = pitch_kp * pitch_error + pitch_ki / 2.0 * (pitch_error + pitch_previous_error) + pitch_old_I + 2.0 * pitch_kd * (pitch_error - pitch_previous_error) + pitch_old_D;
-    pitch_old_I = pitch_ki / 2.0 * (pitch_error + pitch_previous_error);
-    pitch_old_D = 2.0 * pitch_kd * (pitch_error - pitch_previous_error);
+    roll_PID = PIDF_Tustin(kp[0], K1[0], K2[0], f[0], roll_error, roll_previous_error, previous_I[0], previous_D[0]);
+    pitch_PID = PIDF_Tustin(kp[1], K1[1], K2[1], f[1], pitch_error, pitch_previous_error, previous_I[1], previous_D[1]);
+    yaw_PID = PIDF_Tustin(kp[2], K1[2], K2[2], f[2], yaw_error, yaw_previous_error, previous_I[2], previous_D[2]);
 
-
-    roll_PID  = roll_kp * roll_error + roll_ki / 2.0 * (roll_error + pitch_previous_error) + roll_old_I + 2.0 * roll_kd * (roll_error - roll_previous_error) + roll_old_D;
-    roll_old_I = roll_ki / 2.0 * (roll_error + roll_previous_error);
-    roll_old_D = 2.0 * roll_kd * (roll_error - roll_previous_error);
-
-
-
-
-    pitch_previous_error = pitch_error;
-    roll_previous_error = roll_error;
-    yaw_previous_error = yaw_error;
 
     roll_PID = anti_windup(roll_PID, -400, 400);
     pitch_PID = anti_windup(pitch_PID, -400, 400);
@@ -241,11 +260,13 @@ void loop() {
   difference = micros() - main_loop_timer;
 
   while (difference < 2500) {
-    Serial.print(input_THROTTLE);
+    Serial.print(millis());
     Serial.print(", ");
-    Serial.println(input_ROLL);
-
-
+    Serial.print(pitch);
+    Serial.print(", ");
+    Serial.print(pitch_PID);
+    Serial.print(", ");
+    Serial.println(gy);
 
     difference = micros() - main_loop_timer;
   }

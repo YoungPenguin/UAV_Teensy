@@ -1,9 +1,9 @@
 /*
- * hello there stranger!
- * I see you have found the flight controller, i must say you have very good tast.
- * This is the main file, here you can input the flightmodes you have implementet
- * down in the switch case. Or ofc just use it as is!
- * Hope you enjoy it 
+   hello there stranger!
+   I see you have found the flight controller, i must say you have very good tast.
+   This is the main file, here you can input the flightmodes you have implementet
+   down in the switch case. Or ofc just use it as is!
+   Hope you enjoy it
 */
 
 #include <Servo.h>
@@ -78,6 +78,7 @@ float yaw_pid_i = 0;
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
+bool mag = true;
 
 // timing the code
 volatile int cycles;
@@ -111,7 +112,7 @@ void setup() {
   }
 
   imu.begin();
-  filter.begin(100);
+  filter.begin(400); // sample freq for prop shield
   // imu.setSeaPressure(98900);
 
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
@@ -124,7 +125,7 @@ void setup() {
     myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
   */
   while (!(imu.available())); // to make sure the hardware it rdy 2 go
-  }
+}
 void loop() {
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
@@ -133,7 +134,11 @@ void loop() {
   // Read the motion sensors
   imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
   // Update the SensorFusion filter
-  filter.updateIMU(gx, gy, gz, ax, ay, az);
+
+  mag ? filter.update(gx, gy, gz, ax, ay, az, mx, my, mz) : filter.updateIMU(gx, gy, gz, ax, ay, az);
+  
+  //filter.updateIMU(gx, gy, gz, ax, ay, az); // uden mag
+  //filter.update(gx, gy, gz, ax, ay, az, mx, my, mz); // med mag
 
   flightflag = flightmodes(flightflag, input_pin[0], input_pin[1], input_pin[2], input_pin[3]);
 
@@ -183,7 +188,7 @@ void stopAll() {
     int thisInput = anti_windup(thisProp, 0, 3);
     Serial_input[thisInput] = 0;
   }
-  
+
   roll_pid_i       = 0;
   pitch_pid_i      = 0;
   yaw_pid_i        = 0;

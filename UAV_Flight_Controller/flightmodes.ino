@@ -1,7 +1,7 @@
 /*
- * This block is just the different **magic stick positions** you are able to do 
- * on the controller to enter a specific flight mode
- * You can change this or just add more in the same manner.
+   This block is just the different **magic stick positions** you are able to do
+   on the controller to enter a specific flight mode
+   You can change this or just add more in the same manner.
 */
 
 int flightmodes(int a, int input1, int input2, int input3, int input4) {

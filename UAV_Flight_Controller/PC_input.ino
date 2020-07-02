@@ -1,21 +1,22 @@
 /*
- * Hey you!
- * You have found the custom Serial input protocol 
- * This is very self-explanitory but here is a table of the commands avilable:
- * 
- * Action  |  Command  | Input range
- * ---------------------------------------
- * Roll    |  R+/-###  | +/- 20 deg
- * Pitch   |  P+/-###  | +/- 20 deg
- * Yaw     |  Y+/-###  | +/- 360 deg
- * Throttle|  T+###    | 0 =< # < 1000 us
- * ---------------------------------------
- * 
- * If you don't follow this, all inputs will just be set to 0
- * 
- * So year you can just make your own or change 
- * the way you give input to this
- * 
+   Hey you!
+   You have found the custom Serial input protocol
+   This is very self-explanitory but here is a table of the commands avilable:
+
+   Action  |  Command  | Input range
+   ---------------------------------------
+   Roll    |  R+/-###  | +/- 20 deg
+   Pitch   |  P+/-###  | +/- 20 deg
+   Yaw     |  Y+/-###  | +/- 360 deg
+   Throttle|  T+###    | 0 =< # < 1000 us
+   Mag     |  M+/-     | On/Off = +/-
+   ---------------------------------------
+
+   If you don't follow this, all inputs will just be set to 0
+
+   So year you can just make your own or change
+   the way you give input to this
+
 */
 
 char string[5];
@@ -52,6 +53,9 @@ void PC_input(int & a, int & b, int & c, int & d) {
         break;
       case 'T':
         d = ((val >= 0) && (val < 1000)) ? val : 0;
+        break;
+      case 'M':
+        mag = (sign == 1) ? true : false;
         break;
       default:
         a = 0;
