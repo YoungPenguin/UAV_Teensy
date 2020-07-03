@@ -136,7 +136,7 @@ void loop() {
   // Update the SensorFusion filter
 
   mag ? filter.update(gx, gy, gz, ax, ay, az, mx, my, mz) : filter.updateIMU(gx, gy, gz, ax, ay, az); // switching between including/excluting magnetometer data
-  
+
   flightflag = flightmodes(flightflag, input_pin[0], input_pin[1], input_pin[2], input_pin[3]);
 
   switch (flightflag) {
@@ -166,7 +166,7 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-    // if (data_flag == 0)data_vector();
+    if (data_flag == 0)data_vector();
   }
 }
 

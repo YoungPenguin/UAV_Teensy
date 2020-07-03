@@ -96,18 +96,21 @@ float main_loop_timer = 0;
 
 
 
-
-
 float alpha = 0.05;
 float tau_D = 0.08333333333;
-float tau_I = 0.040625;
-float kp = 1.3;
+float tau_I = 1;//0.040625;
+float kp = 1.8;
 float T = 0.0025;
-
+float K, f, K1, K2;
 
 
 
 void setup() {
+
+K=2/T;
+K1=(-alpha*tau_D*K+1)/(alpha*tau_D*K+1);
+K2=(kp*tau_D*K)/(alpha*tau_D*K+1);
+f=(1/K)*(kp)/(tau_I);
 
   Serial.begin(9600);
 
@@ -198,9 +201,9 @@ void loop() {
     yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
 
     /*///////////////////////////P I D///////////////////////////////////*/
-    roll_error = roll - roll_desired_angle;
+    roll_error = 0;//roll - roll_desired_angle;
     pitch_error = pitch - pitch_desired_angle;
-    yaw_error = total_yaw - yaw_desired_angle;
+    yaw_error = 0;//total_yaw - yaw_desired_angle;
 
     roll_pid_i += (roll_ki * roll_error);
     pitch_pid_i += (pitch_ki * pitch_error);
@@ -210,13 +213,13 @@ void loop() {
     pitch_pid_i = anti_windup(pitch_pid_i, -200, 200);
     yaw_pid_i = anti_windup(yaw_pid_i, -200, 200);
 
-    roll_PID = roll_kp * roll_error + 0.04* (roll_error + roll_previous_error) + roll_old_I + 20 * (roll_error - roll_previous_error) + 0.5*roll_old_D;
-    roll_old_I = 0.04* (roll_error + roll_previous_error);
-    roll_old_D = 20* (roll_error - roll_previous_error);
+    roll_PID = roll_kp * roll_error + f* (roll_error + roll_previous_error) + roll_old_I + K2 * (roll_error - roll_previous_error) - (K1*roll_old_D);
+    roll_old_I = f* (roll_error + roll_previous_error);
+    roll_old_D = K2 * (roll_error - roll_previous_error) - (K1*roll_old_D);
 
-    pitch_PID = pitch_kp * pitch_error + 0.04 * (pitch_error + pitch_previous_error) + pitch_old_I +  20 * (pitch_error - pitch_previous_error) + 0.5*pitch_old_D;
-    pitch_old_I = 0.04* (pitch_error + pitch_previous_error);
-    pitch_old_D = 20 * (pitch_error - pitch_previous_error);
+    pitch_PID = pitch_kp * pitch_error + f * (pitch_error + pitch_previous_error) + pitch_old_I +  K2 * (pitch_error - pitch_previous_error) - (K1*pitch_old_D);
+    pitch_old_I = f* (pitch_error + pitch_previous_error);
+    pitch_old_D =  K2 * (pitch_error - pitch_previous_error) - (K1*pitch_old_D);
 
 
     yaw_PID = yaw_kp * yaw_error + yaw_pid_i + yaw_kd * ((yaw_error - yaw_previous_error));
@@ -248,18 +251,14 @@ void loop() {
   }
 
 
+Serial.print(pitch);
+Serial.print(", ");
+Serial.println(pitch_PID);
 
   //maintain_loop_time();
   difference = micros() - main_loop_timer;
 
   while (difference < 2500) {
-    Serial.print(input_THROTTLE);
-    Serial.print(", ");
-    Serial.print(input_ROLL);
-    Serial.print(", ");
-    Serial.print(input_PITCH);
-    Serial.print(", ");
-    Serial.println(input_YAW);
 
 
     difference = micros() - main_loop_timer;

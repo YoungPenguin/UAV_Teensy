@@ -10,6 +10,7 @@
    Yaw     |  Y+/-###  | +/- 360 deg
    Throttle|  T+###    | 0 =< # < 1000 us
    Mag     |  M+/-     | On/Off = +/-
+   Data    |  D+/-     | On/Off = +/-
    ---------------------------------------
 
    If you don't follow this, all inputs will just be set to 0
@@ -56,6 +57,9 @@ void PC_input(int & a, int & b, int & c, int & d) {
         break;
       case 'M':
         mag = (sign == 1) ? true : false;
+        break;
+      case 'D':
+        data_flag = (sign == 1) ? 0 : 1;
         break;
       default:
         a = 0;
