@@ -96,21 +96,34 @@ float main_loop_timer = 0;
 
 
 
-float alpha = 0.05;
-float tau_D = 0.08333333333;
-float tau_I = 1;//0.040625;
-float kp = 1.8;
+float alpha[3] = {0.05, 0.05, 0.05};
+float tau_D[3] = {0.083, 0.083, 0.083};
+float tau_I[3] = {1, 1, 1};
+float kp[3] = {1.8, 1.8, 1.8};
 float T = 0.0025;
-float K, f, K1, K2;
+float K, f[3], K1[3], K2[3];
 
 
 
 void setup() {
 
 K=2/T;
-K1=(-alpha*tau_D*K+1)/(alpha*tau_D*K+1);
-K2=(kp*tau_D*K)/(alpha*tau_D*K+1);
-f=(1/K)*(kp)/(tau_I);
+K1[0]=(-alpha[0]*tau_D[0]*K+1)/(alpha[0]*tau_D[0]*K+1);
+K2[0]=(kp[0]*tau_D[0]*K)/(alpha[0]*tau_D[0]*K+1);
+f[0]=(1/K)*(kp[0])/(tau_I[0]);
+
+
+K=2/T;
+K1[1]=(-alpha[1]*tau_D[1]*K+1)/(alpha[1]*tau_D[1]*K+1);
+K2[1]=(kp[1]*tau_D[1]*K)/(alpha[1]*tau_D[1]*K+1);
+f[1]=(1/K)*(kp[1])/(tau_I[1]);
+
+
+K=2/T;
+K1[2]=(-alpha[2]*tau_D[2]*K+1)/(alpha[2]*tau_D[2]*K+1);
+K2[2]=(kp[0]*tau_D[0]*K)/(alpha[2]*tau_D[2]*K+1);
+f[2]=(1/K)*(kp[2])/(tau_I[2]);
+
 
   Serial.begin(9600);
 

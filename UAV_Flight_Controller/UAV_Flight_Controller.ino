@@ -36,25 +36,41 @@ void failsafe(); // fligthmode 2 = failsafe
 // void flightMode3(); // Altitude
 // void flightMode4(); // GPS hold
 
+
+
+
+/******************** Values to edit ************************/
 #define loop_time 450000 //45000=2.5ms @ 180Mhz // 36000=2ms
 #define pinCount 6
-
 // total number of motors
 Servo Propeller[pinCount];
 float pwm_[pinCount] = {0.0, 0.0, 0.0};
 
 bool mag = true;
 
+/* roll, pitch, yaw */
+float alpha[3] = {0.05, 0.05, 0.05};
+float tau_D[3] = {0.083, 0.083, 0.083};
+float tau_I[3] = {1, 1, 1};
+float kp[3] = {1.8, 1.8, 1.8};
+float T = 0.0025;
+float K, f[3], K1[3], K2[3];
+
 unsigned long counter[6];
 byte last_CH_state[5];
 int input_pin[5];
+
+/******************* inizilazation ******************/
+float PID_output[3];
+float error[3];
+float old_error[3];
+float Iterm[3];
+float Dterm[3];
+float old_I[3];
+float old_D[3];
+
 int throttle = 0;
 int flightflag = 0;
-
-/*{Kp, Ki, Kd}*/
-float roll_pid_values[3]    = {1.3, 0.02, 28.0};
-float pitch_pid_values[3]   = {1.3, 0.04, 28.0};
-float yaw_pid_values[3]     = {7.0, 0.5, 10.0};
 
 /*Controller inputs*/
 float desired_angle[3]      = {0.0, 0.0, 0.0};
@@ -63,25 +79,17 @@ float total_yaw             = 0.0;
 
 /*PC input with serial check PC_input for the commands*/
 int Serial_input[4] = {0, 0, 0, 0};
-
 int data_flag = 0;
-
 float roll, pitch, yaw, yaw_previous, yaw_difference, last_yaw;
-
-float PID_output[3];
-float error[3];
-float old_error[3];
-float D_term[3]     = {0, 0, 0};
-float roll_pid_i = 0;
-float pitch_pid_i = 0;
-float yaw_pid_i = 0;
 
 /*Prop shield varibles*/
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
+
 // timing the code
 volatile int cycles;
+
 
 void setup() {
 
@@ -113,17 +121,28 @@ void setup() {
 
   imu.begin();
   filter.begin(400); // sample freq for prop shield. 400Hz is max in hybrid mode
-  // imu.setSeaPressure(98900);
 
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
-  /*
-    myPressure.begin(); // Get sensor online
-    myPressure.setModeBarometer(); // Measure pressure in Pascals from 20 to 110 kPa
-    myPressure.setOversampleRate(1); // Set Oversample to the recommended 128
-    myPressure.enableEventFlags(); // Enable all three pressure and temp event flags
-  */
+  /*Calculate tustin values*/
+  K = 2 / T; // roll
+  K1[0] = (-alpha[0] * tau_D[0] * K + 1) / (alpha[0] * tau_D[0] * K + 1);
+  K2[0] = (kp[0] * tau_D[0] * K) / (alpha[0] * tau_D[0] * K + 1);
+  f[0] = (1 / K) * (kp[0]) / (tau_I[0]);
+
+  K = 2 / T; // pitch
+  K1[1] = (-alpha[1] * tau_D[1] * K + 1) / (alpha[1] * tau_D[1] * K + 1);
+  K2[1] = (kp[1] * tau_D[1] * K) / (alpha[1] * tau_D[1] * K + 1);
+  f[1] = (1 / K) * (kp[1]) / (tau_I[1]);
+
+  K = 2 / T; // yaw
+  K1[2] = (-alpha[2] * tau_D[2] * K + 1) / (alpha[2] * tau_D[2] * K + 1);
+  K2[2] = (kp[0] * tau_D[0] * K) / (alpha[2] * tau_D[2] * K + 1);
+  f[2] = (1 / K) * (kp[2]) / (tau_I[2]);
+  /*Calculate tustin values*/
+
+
   while (!(imu.available())); // to make sure the hardware it rdy 2 go
 }
 void loop() {
@@ -151,13 +170,6 @@ void loop() {
     case 2:
       failsafe();
       break;
-    /*    case 3:
-          flightMode3();
-          float pressure = myPressure.readPressure();
-          float temperature = 25 + 273.15; // = myPressure.readTemp() + 273.15;
-          Height = -(log(pressure / 100900) * 8.3143 * temperature) / (0.28401072);
-          break;
-    */
     default:
       failsafe();
       break;
@@ -183,10 +195,10 @@ void stopAll() {
     int thisInput = anti_windup(thisProp, 0, 3);
     Serial_input[thisInput] = 0;
   }
-
-  roll_pid_i       = 0;
-  pitch_pid_i      = 0;
-  yaw_pid_i        = 0;
+  for (int i = 0; i < 3; i++) {
+    Iterm[i] = 0;
+    Dterm[i] = 0;
+  }
   total_yaw        = 0;
   desired_angle[2] = 0;
 }
