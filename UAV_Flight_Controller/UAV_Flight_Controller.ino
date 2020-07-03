@@ -14,9 +14,7 @@
 // #include "SparkFunMPL3115A2.h"
 
 NXPMotionSense imu;
-Madgwick filter; // using the madgwick algo - change to mahony if you have problem with drift
-// zMPL3115A2 myPressure;
-// float Height;
+Madgwick filter; // using the madgwick algo - change to mahony if you have problems with drift
 
 /* functions */
 void Transmitter();
@@ -33,12 +31,6 @@ void flightMode0(); // dis-armed
 void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
 
-// void flightMode3(); // Altitude
-// void flightMode4(); // GPS hold
-
-
-
-
 /******************** Values to edit ************************/
 #define loop_time 450000 //45000=2.5ms @ 180Mhz // 36000=2ms
 #define pinCount 6
@@ -48,8 +40,8 @@ float pwm_[pinCount] = {0.0, 0.0, 0.0};
 
 bool mag = true;
 
-/* roll, pitch, yaw */
-float alpha[3] = {0.05, 0.05, 0.05};
+/* [roll, pitch, yaw] */
+float alpha[3] = {0.02, 0.02, 0.02};
 float tau_D[3] = {0.083, 0.083, 0.083};
 float tau_I[3] = {1, 1, 1};
 float kp[3] = {1.8, 1.8, 1.8};
@@ -59,6 +51,7 @@ float K, f[3], K1[3], K2[3];
 unsigned long counter[6];
 byte last_CH_state[5];
 int input_pin[5];
+
 
 /******************* inizilazation ******************/
 float PID_output[3];
@@ -142,9 +135,9 @@ void setup() {
   f[2] = (1 / K) * (kp[2]) / (tau_I[2]);
   /*Calculate tustin values*/
 
-
   while (!(imu.available())); // to make sure the hardware it rdy 2 go
 }
+
 void loop() {
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
@@ -152,25 +145,24 @@ void loop() {
 
   // Read the motion sensors
   imu.readMotionSensor(ax, ay, az, gx, gy, gz, mx, my, mz);
-  // Update the SensorFusion filter
 
   mag ? filter.update(gx, gy, gz, ax, ay, az, mx, my, mz) : filter.updateIMU(gx, gy, gz, ax, ay, az); // switching between including/excluting magnetometer data
 
-  flightflag = flightmodes(flightflag, input_pin[0], input_pin[1], input_pin[2], input_pin[3]);
+  flightflag = flightmodes(flightflag, input_pin[0], input_pin[1], input_pin[2], input_pin[3]); // switching between arming and dis-arming
 
   switch (flightflag) {
-    case 0:
+    case 0: // dis-armed (default)
       flightMode0();
       PORTB &= B11011111;
       break;
-    case 1:
-      flightMode1();
+    case 1: // Armed
+      flightMode1(); 
       PORTB |= B00100000;
       break;
-    case 2:
+    case 2: // better safe the sorry
       failsafe();
       break;
-    default:
+    default: // random input go to fail-safe
       failsafe();
       break;
   }

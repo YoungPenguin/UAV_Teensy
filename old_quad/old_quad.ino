@@ -96,33 +96,22 @@ float main_loop_timer = 0;
 
 
 
-float alpha[3] = {0.05, 0.05, 0.05};
-float tau_D[3] = {0.083, 0.083, 0.083};
-float tau_I[3] = {1, 1, 1};
-float kp[3] = {1.8, 1.8, 1.8};
+float alpha = 0.03;
+float tau_D = 0.1283;
+float tau_I = 0.4;
+float kp = 1.3;
 float T = 0.0025;
-float K, f[3], K1[3], K2[3];
+float K, f, K1, K2;
 
 
 
 void setup() {
 
 K=2/T;
-K1[0]=(-alpha[0]*tau_D[0]*K+1)/(alpha[0]*tau_D[0]*K+1);
-K2[0]=(kp[0]*tau_D[0]*K)/(alpha[0]*tau_D[0]*K+1);
-f[0]=(1/K)*(kp[0])/(tau_I[0]);
+K1=(-alpha*tau_D*K+1)/(alpha*tau_D*K+1);
+K2=(kp*tau_D*K)/(alpha*tau_D*K+1);
+f=(1/K)*(kp)/(tau_I);
 
-
-K=2/T;
-K1[1]=(-alpha[1]*tau_D[1]*K+1)/(alpha[1]*tau_D[1]*K+1);
-K2[1]=(kp[1]*tau_D[1]*K)/(alpha[1]*tau_D[1]*K+1);
-f[1]=(1/K)*(kp[1])/(tau_I[1]);
-
-
-K=2/T;
-K1[2]=(-alpha[2]*tau_D[2]*K+1)/(alpha[2]*tau_D[2]*K+1);
-K2[2]=(kp[0]*tau_D[0]*K)/(alpha[2]*tau_D[2]*K+1);
-f[2]=(1/K)*(kp[2])/(tau_I[2]);
 
 
   Serial.begin(9600);
@@ -214,9 +203,9 @@ void loop() {
     yaw_desired_angle = yaw_desired_angle + yaw_desired_angle_set;
 
     /*///////////////////////////P I D///////////////////////////////////*/
-    roll_error = 0;//roll - roll_desired_angle;
+    roll_error = roll - roll_desired_angle;
     pitch_error = pitch - pitch_desired_angle;
-    yaw_error = 0;//total_yaw - yaw_desired_angle;
+    yaw_error = total_yaw - yaw_desired_angle;
 
     roll_pid_i += (roll_ki * roll_error);
     pitch_pid_i += (pitch_ki * pitch_error);
@@ -226,7 +215,7 @@ void loop() {
     pitch_pid_i = anti_windup(pitch_pid_i, -200, 200);
     yaw_pid_i = anti_windup(yaw_pid_i, -200, 200);
 
-    roll_PID = roll_kp * roll_error + f* (roll_error + roll_previous_error) + roll_old_I + K2 * (roll_error - roll_previous_error) - (K1*roll_old_D);
+    roll_PID = roll_kp * roll_error + f * (roll_error + roll_previous_error) + roll_old_I + K2 * (roll_error - roll_previous_error) - (K1*roll_old_D);
     roll_old_I = f* (roll_error + roll_previous_error);
     roll_old_D = K2 * (roll_error - roll_previous_error) - (K1*roll_old_D);
 
