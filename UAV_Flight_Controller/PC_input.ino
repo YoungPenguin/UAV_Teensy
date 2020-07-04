@@ -59,7 +59,7 @@ void PC_input(int & a, int & b, int & c, int & d) {
         mag = (sign == 1) ? true : false;
         break;
       case 'D':
-        data_flag = (sign == 1) ? 0 : 1;
+        dataOn = (sign == 1) ? true : false;
         break;
       default:
         a = 0;

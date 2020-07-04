@@ -38,7 +38,8 @@ void failsafe(); // fligthmode 2 = failsafe
 Servo Propeller[pinCount];
 float pwm_[pinCount] = {0.0, 0.0, 0.0};
 
-bool mag = true;
+bool mag = true; // dafault state for magnetometer On/Off = true/false
+bool dataOn = true; // dafault state for data On/Off = true/false
 
 /* [roll, pitch, yaw] */
 float alpha[3] = {0.02, 0.02, 0.02};
@@ -170,7 +171,7 @@ void loop() {
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
-    if (data_flag == 0)data_vector();
+    if (data_flag == 0 && dataOn)data_vector();
   }
 }
 

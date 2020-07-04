@@ -116,9 +116,9 @@ void setup() {
   K3 = (1 - alpha * tau_D * K) / (1 + alpha * tau_D * K );
 
 
-  K2 = (- tau_D * K+1) / (alpha * tau_D * K+1);
+  K2 = (- tau_D * K + 1) / (alpha * tau_D * K + 1);
 
-  K1 = (tau_D * K) / (alpha * tau_D * K+1);
+  K1 = (tau_D * K) / (alpha * tau_D * K + 1);
 
   f = (1 / K) * (kp) / (tau_I);
 
@@ -160,7 +160,6 @@ void loop() {
   timePrev = time;
   time = millis();
   elapsedTime = (time - timePrev) / 1000;
-datavector();
 
 
   if (input_THROTTLE < 1000) {
@@ -215,39 +214,14 @@ datavector();
 
     /*///////////////////////////P I D///////////////////////////////////*/
 
-    Serial.print(" K1: ");
-    Serial.print(K1);
-    
-    Serial.print(" K2: ");
-    Serial.print(K2);
-
-    
-    Serial.print(" K3: ");
-    Serial.print(K3);
-    
-    Serial.print(" f: ");
-    Serial.print(f);
-
-        Serial.print(" pithc: ");
-    Serial.print(pitch);
-
-            Serial.print(" old: ");
-    Serial.print(old_pitch);
-
-                Serial.print(" OLD DDDD: ");
-    Serial.print(pitch_old_D);
-
-
-
-
     pitch_VAL = ((pitch * K1) + (old_pitch * K2) - (pitch_old_D * K3));
     roll_VAL = (roll * K1 + old_roll * K2 - roll_old_D * K3);
-    
+
     old_roll = roll;
     old_pitch = pitch;
-    
-    roll_error = roll_VAL- roll_desired_angle ;
-    pitch_error = pitch_VAL- pitch_desired_angle ;
+
+    roll_error = roll_VAL - roll_desired_angle ;
+    pitch_error = pitch_VAL - pitch_desired_angle ;
     yaw_error = total_yaw - yaw_desired_angle;
 
 
@@ -299,6 +273,9 @@ datavector();
 
   }
 
+  Serial.print(millis());
+  Serial.print(", ");
+  Serial.println(yaw);
 
 
 
