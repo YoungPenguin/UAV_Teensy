@@ -47,7 +47,11 @@ float tau_D[3] = {0.083, 0.083, 0.083};
 float tau_I[3] = {1, 1, 1};
 float kp[3] = {1.8, 1.8, 1.8};
 float T = 0.0025;
-float K, f[3], K1[3], K2[3];
+float K[3] = {800, 800, 800};
+
+
+/************************/
+float f1[3], f2[3], K1[3], K2[3], K3[3];
 
 unsigned long counter[6];
 byte last_CH_state[5];
@@ -75,6 +79,9 @@ float total_yaw             = 0.0;
 int Serial_input[4] = {0, 0, 0, 0};
 int data_flag = 0;
 float roll, pitch, yaw, yaw_previous, yaw_difference, last_yaw;
+float roll_val, pitch_val, yaw_val;
+float old_roll, old_pitch, old_yaw;
+float old_Lead[3];
 
 /*Prop shield varibles*/
 float ax, ay, az;
@@ -120,20 +127,25 @@ void setup() {
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
   /*Calculate tustin values*/
-  K = 2 / T; // roll
-  K1[0] = (-alpha[0] * tau_D[0] * K + 1) / (alpha[0] * tau_D[0] * K + 1);
-  K2[0] = (kp[0] * tau_D[0] * K) / (alpha[0] * tau_D[0] * K + 1);
-  f[0] = (1 / K) * (kp[0]) / (tau_I[0]);
+  f1[0] = (tau_I[0] * K[0] + 1 ) / (tau_I[0] * K[0]);
+  f2[0] = (1 - tau_I[0] * K[0]) / (tau_I[0] * K[0]);
+  K1[0] = (tau_D[0] * K[0] + 1) / (1 + alpha[0] * tau_D[0] * K[0]);
+  K2[0] = (1 - tau_D[0] * K[0]) / (1 + alpha[0] * tau_D[0] * K[0]);
+  K3[0] = (1 - alpha[0] * tau_D[0] * K[0]) / (1 + alpha[0] * tau_D[0] * K[0]);
 
-  K = 2 / T; // pitch
-  K1[1] = (-alpha[1] * tau_D[1] * K + 1) / (alpha[1] * tau_D[1] * K + 1);
-  K2[1] = (kp[1] * tau_D[1] * K) / (alpha[1] * tau_D[1] * K + 1);
-  f[1] = (1 / K) * (kp[1]) / (tau_I[1]);
+  f1[1] = (tau_I[0] * K[0] + 1 ) / (tau_I[0] * K[0]);
+  f2[1] = (1 - tau_I[0] * K[0]) / (tau_I[0] * K[0]);
+  K1[1] = (tau_D[1] * K[1] + 1) / (1 + alpha[1] * tau_D[1] * K[1]);
+  K2[1] = (1 - tau_D[1] * K[1]) / (1 + alpha[1] * tau_D[1] * K[1]);
+  K3[1] = (1 - alpha[1] * tau_D[1] * K[1]) / (1 + alpha[1] * tau_D[1] * K[1]);
 
-  K = 2 / T; // yaw
-  K1[2] = (-alpha[2] * tau_D[2] * K + 1) / (alpha[2] * tau_D[2] * K + 1);
-  K2[2] = (kp[0] * tau_D[0] * K) / (alpha[2] * tau_D[2] * K + 1);
-  f[2] = (1 / K) * (kp[2]) / (tau_I[2]);
+  f1[2] = (tau_I[2] * K[2] + 1 ) / (tau_I[2] * K[2]);
+  f2[2] = (1 - tau_I[2] * K[2]) / (tau_I[2] * K[2]);
+  K1[2] = (tau_D[2] * K[0] + 1) / (1 + alpha[2] * tau_D[2] * K[2]);
+  K2[2] = (1 - tau_D[2] * K[2]) / (1 + alpha[2] * tau_D[2] * K[2]);
+  K3[2] = (1 - alpha[2] * tau_D[2] * K[2]) / (1 + alpha[2] * tau_D[2] * K[2]);
+
+
   /*Calculate tustin values*/
 
   while (!(imu.available())); // to make sure the hardware it rdy 2 go
@@ -157,7 +169,7 @@ void loop() {
       PORTB &= B11011111;
       break;
     case 1: // Armed
-      flightMode1(); 
+      flightMode1();
       PORTB |= B00100000;
       break;
     case 2: // better safe the sorry
