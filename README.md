@@ -19,9 +19,12 @@ UAV PID control with teensy 3.6
 This project will be made highly scaleble, so it's not restricted to a Hexacopter as documented in this project it can also be applyed to Quad- Hexa- octo- and so on..- copter.
 
 # Files 
-- 3 DoF UAV - Template 
-- 6 DoF UAV control - Folder "GPS" including the World to body conversion block as separate component this will make it very easy for you to impelement different features like "home lock" "return to home" "switch coordinate system" and so on... 
-When adding new functionality to the flight controller please do it with some kind of modular software architecture approach. And ofc SHARE IT!!! :D
+- UAV_Flight_Controller . This is the main controller with all its files, discreption is inside the files
+- Processing. Just a script with a 3D model of live data, this can be found at https://www.pjrc.com/store/prop_shield.html
+- matlab. Some matlab and simulink models of the Drone
+- dev trash. just files from erly stages in the development... year just skip that one.
+
+videos included 
 
 ## simulations files 
 If you have a valid matlab licence you can use:
