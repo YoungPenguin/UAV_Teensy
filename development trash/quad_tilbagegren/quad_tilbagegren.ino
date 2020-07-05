@@ -101,7 +101,7 @@ float tau_D = 0.0833;
 float tau_I = 1;
 float kp = 2.8;
 float T = 0.0025;
-float K, f, K1, K2, K3;
+float K, f1, f2, K1, K2, K3;
 
 float old_pitch = 0;
 float old_roll = 0;
@@ -118,10 +118,11 @@ void setup() {
 
   K2 = (- tau_D * K + 1) / (alpha * tau_D * K + 1);
 
-  K1 = (tau_D * K) / (alpha * tau_D * K + 1);
+  K1 = (1 + tau_D * K) / (alpha * tau_D * K + 1);
 
-  f = (1 / K) * (kp) / (tau_I);
+  f1 = (tau_I * K + 1) / (tau_I * K);
 
+  f2 = (1 - tau_I * K) / (tau_I * K);
 
 
   Serial.begin(9600);
@@ -234,12 +235,12 @@ void loop() {
     pitch_pid_i = anti_windup(pitch_pid_i, -200, 200);
     yaw_pid_i = anti_windup(yaw_pid_i, -200, 200);
 
-    roll_PID = roll_kp * roll_error + f * (roll_error + roll_previous_error) + roll_old_I; //+ K2 * (roll_error - roll_previous_error) - (K1*roll_old_D);
-    roll_old_I = f * (roll_error + roll_previous_error);
+    roll_PID = roll_kp * (roll_error * f1 + roll_previous_error * f2 + roll_old_I); //roll_kp * roll_error + f * (roll_error + roll_previous_error) + roll_old_I; //+ K2 * (roll_error - roll_previous_error) - (K1*roll_old_D);
+    roll_old_I = (roll_error * f1 + roll_previous_error * f2 + roll_old_I) ;
     roll_old_D = roll_VAL; //K2 * (roll_error - roll_previous_error) - (K1*roll_old_D);
 
-    pitch_PID = pitch_kp * pitch_error + f * (pitch_error + pitch_previous_error) + pitch_old_I; //+  K2 * (pitch_error - pitch_previous_error) - (K1*pitch_old_D);
-    pitch_old_I = f * (pitch_error + pitch_previous_error);
+    pitch_PID = pitch_kp * (pitch_error * f1 + pitch_previous_error * f2 + pitch_old_I); //pitch_error + f * (pitch_error + pitch_previous_error) + pitch_old_I; //+  K2 * (pitch_error - pitch_previous_error) - (K1*pitch_old_D);
+    pitch_old_I = (pitch_error * f1 + pitch_previous_error * f2 + pitch_old_I);
     pitch_old_D =  pitch_VAL; //K2 * (pitch_error - pitch_previous_error) - (K1*pitch_old_D);
 
 
