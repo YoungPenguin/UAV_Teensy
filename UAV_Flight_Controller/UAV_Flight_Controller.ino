@@ -31,7 +31,12 @@ void flightMode0(); // dis-armed
 void flightMode1(); // armed
 void failsafe(); // fligthmode 2 = failsafe
 
-/******************** Values to edit ************************/
+/******************** Values to edit ************************
+
+      Edite the values below with your Kp, tau_d, tau_i 
+      And the K from the discrete controller with pre-warping
+
+***********************************************************/
 #define loop_time 450000 //45000=2.5ms @ 180Mhz // 36000=2ms
 #define pinCount 6
 // total number of motors
@@ -41,24 +46,33 @@ float pwm_[pinCount] = {0.0, 0.0, 0.0};
 bool mag = true; // dafault state for magnetometer On/Off = true/false
 bool dataOn = true; // dafault state for data On/Off = true/false
 
-/* [roll, pitch, yaw] */
-float alpha[3] = {0.02, 0.02, 0.02};
-float tau_D[3] = {0.083, 0.083, 0.083};
-float tau_I[3] = {1, 1, 1};
-float kp[3] = {1.8, 1.8, 1.8};
+/* set your values [roll, pitch, yaw] */
+float alpha[3] = {0.0, 0.0, 0.00};
+float tau_D[3] = {0.0, 0.0, 0.0};
+float tau_I[3] = {0.0, 0.0, 0.0};
+float kp[3] = {0.0, 0.0, 0.0};
 float T = 0.0025;
-float K[3] = {800, 800, 800};
+float K[3] = {0, 0, 0}; // calculate this value from the pre-warping ... or if you belive in GOD the use 2/T
 
 
-/************************/
+
+/******************************************************
+*                       *
+*      Edit there paremeters if you change 
+*      the inputs from the rc transmitter     
+*                       *
+******************************************************/
 float f1[3], f2[3], K1[3], K2[3], K3[3];
 
 unsigned long counter[6];
 byte last_CH_state[5];
 int input_pin[5];
 
-
-/******************* inizilazation ******************/
+/******************************************************
+*                       *
+*       inizilazation   
+*                       *
+******************************************************/
 float PID_output[3];
 float error[3];
 float old_error[3];
@@ -126,7 +140,7 @@ void setup() {
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
-  /*Calculate tustin values*/
+  /*Calculate tustin values so you dont have to*/
   f1[0] = (tau_I[0] * K[0] + 1 ) / (tau_I[0] * K[0]);
   f2[0] = (1 - tau_I[0] * K[0]) / (tau_I[0] * K[0]);
   K1[0] = (tau_D[0] * K[0] + 1) / (1 + alpha[0] * tau_D[0] * K[0]);
@@ -144,8 +158,6 @@ void setup() {
   K1[2] = (tau_D[2] * K[0] + 1) / (1 + alpha[2] * tau_D[2] * K[2]);
   K2[2] = (1 - tau_D[2] * K[2]) / (1 + alpha[2] * tau_D[2] * K[2]);
   K3[2] = (1 - alpha[2] * tau_D[2] * K[2]) / (1 + alpha[2] * tau_D[2] * K[2]);
-
-
   /*Calculate tustin values*/
 
   while (!(imu.available())); // to make sure the hardware it rdy 2 go
