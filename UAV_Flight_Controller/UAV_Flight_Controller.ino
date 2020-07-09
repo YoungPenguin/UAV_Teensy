@@ -40,7 +40,7 @@ void failsafe(); // fligthmode 2 = failsafe
 #define pinCount 6
 // total number of motors
 Servo Propeller[pinCount];
-float pwm_[pinCount] = {0.0, 0.0, 0.0};
+float pwm_[pinCount] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 bool mag = true; // dafault state for magnetometer On/Off = true/false
 bool dataOn = true; // dafault state for data On/Off = true/false
