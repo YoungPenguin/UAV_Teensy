@@ -140,23 +140,13 @@ void setup() {
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
   /*Calculate tustin values so you dont have to*/
-  f1[0] = (tau_I[0] * K[0] + 1 ) / (tau_I[0] * K[0]);
-  f2[0] = (1 - tau_I[0] * K[0]) / (tau_I[0] * K[0]);
-  K1[0] = (tau_D[0] * K[0] + 1) / (1 + alpha[0] * tau_D[0] * K[0]);
-  K2[0] = (1 - tau_D[0] * K[0]) / (1 + alpha[0] * tau_D[0] * K[0]);
-  K3[0] = (1 - alpha[0] * tau_D[0] * K[0]) / (1 + alpha[0] * tau_D[0] * K[0]);
-
-  f1[1] = (tau_I[0] * K[0] + 1 ) / (tau_I[0] * K[0]);
-  f2[1] = (1 - tau_I[0] * K[0]) / (tau_I[0] * K[0]);
-  K1[1] = (tau_D[1] * K[1] + 1) / (1 + alpha[1] * tau_D[1] * K[1]);
-  K2[1] = (1 - tau_D[1] * K[1]) / (1 + alpha[1] * tau_D[1] * K[1]);
-  K3[1] = (1 - alpha[1] * tau_D[1] * K[1]) / (1 + alpha[1] * tau_D[1] * K[1]);
-
-  f1[2] = (tau_I[2] * K[2] + 1 ) / (tau_I[2] * K[2]);
-  f2[2] = (1 - tau_I[2] * K[2]) / (tau_I[2] * K[2]);
-  K1[2] = (tau_D[2] * K[0] + 1) / (1 + alpha[2] * tau_D[2] * K[2]);
-  K2[2] = (1 - tau_D[2] * K[2]) / (1 + alpha[2] * tau_D[2] * K[2]);
-  K3[2] = (1 - alpha[2] * tau_D[2] * K[2]) / (1 + alpha[2] * tau_D[2] * K[2]);
+  for (int i = 0; i < 3; i++) {
+    f1[i] = (tau_I[i] * K[i] + 1 ) / (tau_I[i] * K[i]);
+    f2[i] = (1 - tau_I[i] * K[i]) / (tau_I[i] * K[i]);
+    K1[i] = (tau_D[i] * K[i] + 1) / (1 + alpha[i] * tau_D[i] * K[i]);
+    K2[i] = (1 - tau_D[i] * K[i]) / (1 + alpha[i] * tau_D[i] * K[i]);
+    K3[i] = (1 - alpha[i] * tau_D[i] * K[i]) / (1 + alpha[i] * tau_D[i] * K[i]);
+  }
   /*Calculate tustin values*/
 
   while (!(imu.available())); // to make sure the hardware it rdy 2 go
