@@ -214,7 +214,6 @@ void stopAll() {
   }
   for (int i = 0; i < 3; i++) {
     Iterm[i] = 0;
-    Dterm[i] = 0;
   }
   total_yaw        = 0;
   desired_angle[2] = 0;
