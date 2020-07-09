@@ -11,7 +11,6 @@
 #include <MadgwickAHRS.h>
 #include <Wire.h>
 #include <EEPROM.h>
-// #include "SparkFunMPL3115A2.h"
 
 NXPMotionSense imu;
 Madgwick filter; // using the madgwick algo - change to mahony if you have problems with drift
