@@ -23,8 +23,6 @@ Im currently working on a big improvement to the control loop architecture, the 
 
 
 
-UAV PID control with teensy 3.6
-
 # Main Goal 
 This project will be made highly scaleble, so it's not restricted to a Hexacopter as documented in this project it can also be applyed to Quad- Hexa- octo- and so on..- copter.
 
