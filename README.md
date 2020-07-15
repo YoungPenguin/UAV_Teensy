@@ -16,7 +16,7 @@ If you want to use this software please "fork" and "star" this project to make s
 
 
 # Update
-
+Im currently working on a big improvement to the control loop architecture, the currently implemented is just a simple PI-Lead with the Lead in the feedback path. This will be updated with a cascade approach with some feedforward. The future control architecture can be seen in the figure below. This will still only be for stabilization the GPS implementation will come later....
 
 ![Untitled Diagram](https://user-images.githubusercontent.com/56176145/87570808-73198580-c6c9-11ea-930f-5fbc4cdc08ac.png)
 
