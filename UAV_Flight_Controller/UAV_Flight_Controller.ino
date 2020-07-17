@@ -53,8 +53,6 @@ float kp[3] = {0.0, 0.0, 0.0};
 float T = 0.0025;
 float K[3] = {0, 0, 0}; // calculate this value from the pre-warping ... or if you belive in GOD the use 2/T
 
-
-
 /******************************************************
 *                       *
 *      Edit there paremeters if you change 
