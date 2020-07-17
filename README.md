@@ -1,7 +1,7 @@
 # UAV_Teensy
 Hello there stranger...
 
-Please be aware that there are currently 2 different branches on this git repo. Switch to the **dev branch** if you want to get the latest updates and want to know what is currently under development.  
+Please be aware that there are currently **2 different branches** on this git repo. Switch to the **dev branch** if you want to get the latest updates and want to know what is currently under development.  
 
 
 
