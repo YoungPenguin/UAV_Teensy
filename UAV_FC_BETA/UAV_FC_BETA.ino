@@ -12,6 +12,8 @@
 #include <Wire.h>
 #include <EEPROM.h>
 
+#include <FrameType_QuadX.h>
+
 #include "helpers.h"
 
 
@@ -43,7 +45,7 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   Serial.setTimeout(1);
-  
+
   DDRB |= B00100000;
   PORTB &= B11011111;
 
