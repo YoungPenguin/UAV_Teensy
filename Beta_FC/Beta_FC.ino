@@ -14,6 +14,7 @@
 #include "controller.h"
 #include "PID.h"
 #include "SerialCom.h"
+#include "StoreData.h"
 //#include <BatteryMonitor_current.h>
 //#include <Receiver_teensy3_HW_PPM.h>
 //#include <FrameType_QuadX.h>
