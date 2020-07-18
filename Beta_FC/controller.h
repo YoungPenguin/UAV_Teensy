@@ -5,9 +5,9 @@
 #define ATTITUDE_MODE 3
 
 // Primary channel definitions
-#define ROLL        0
-#define PITCH       1
-#define THROTTLE    2
+#define THROTTLE    0
+#define ROLL        1
+#define PITCH       2
 #define YAW         3
 
 // PID pseudo definitions
@@ -20,11 +20,9 @@
 #define loop_time 450000 // 2.5ms @ 180Mhz 
 
 volatile int cycles;
-unsigned short int flightflag = 0;
+int8_t flightflag = 0;
 
 bool all_ready = false;
-bool armed = false;
-bool flightMode = false;
 bool altitudeHoldBaro = false;
 bool altitudeHoldSonar = false;
 bool positionHoldGPS = false;
