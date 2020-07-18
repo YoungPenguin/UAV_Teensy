@@ -16,7 +16,6 @@
 #define D  2 // Derivative
 #define WG 3 // WindupGuard
 
-
 #define loop_time 450000 // 2.5ms @ 180Mhz 
 
 volatile int cycles;
@@ -26,7 +25,6 @@ bool all_ready = false;
 bool altitudeHoldBaro = false;
 bool altitudeHoldSonar = false;
 bool positionHoldGPS = false;
-
 
 // FlightController commands definitions
 float commandYaw, commandYawAttitude, commandPitch, commandRoll, commandThrottle;
