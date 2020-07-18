@@ -20,11 +20,11 @@
 
 */
 
-char string[5];
-int val  = 0;
-int sign = 1;
+unsigned char string[5];
+short int val  = 0;
+unsigned short int sign = 1;
 
-void PC_input(int & a, int & b, int & c, int & d) {
+void Serial_input(int & a, int & b, int & c, int & d, bool & mag, bool & data) {
   // send data only when you receive data:
   if (Serial.available() > 0) {
     string[0] = Serial.read(); // action letter
@@ -59,7 +59,7 @@ void PC_input(int & a, int & b, int & c, int & d) {
         mag = (sign == 1) ? true : false;
         break;
       case 'D':
-        dataOn = (sign == 1) ? true : false;
+        data = (sign == 1) ? true : false;
         break;
       default:
         a = 0;

@@ -44,7 +44,7 @@ class PID {
             
             *PID_output = *Kp * error + *Ki * integral + *Kd * derivative;
             
-            previous_error = *PID_input;
+            previous_error = error;
             last_time = now;
         };
         
