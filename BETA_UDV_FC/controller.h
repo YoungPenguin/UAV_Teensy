@@ -1,7 +1,6 @@
 
 #include "./Frames/FrameType_QuadX.h"
 
-
 // all PID controllers has the setup  = {Kp, Ki, Kd, Anti-windup};
 // Attitude - Outer loop
 float PID_YAW_c[4]   = {0.0, 0.0, 0.0, 0.0};
