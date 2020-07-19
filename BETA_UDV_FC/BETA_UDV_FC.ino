@@ -15,7 +15,6 @@
 #include "controller.h"
 #include "pid.h"
 #include "helpers.h"
-//#include <FrameType_QuadX.h>
 
 Madgwick filter;
 
@@ -42,21 +41,29 @@ void loop() {
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
 
-  switch (flightflag) {
+  switch (flightMode) {
     case DISARMED:
-
+      StopAll();
       PORTB &= B11011111;
       break;
     case RATE_MODE:
-
+      if (THROTTLE > 1000) { // disable stabilization if throttle is very low
+        updateMotorsMix(); // Frame specific motor mix
+      } else {
+        StopAll();
+      }
       PORTB |= B00100000;
       break;
     case ACRO_MODE:
-
+      if (THROTTLE > 1000) { // disable stabilization if throttle is very low
+        updateMotorsMix(); // Frame specific motor mix
+      } else {
+        StopAll();
+      }
       PORTB |= B00100000;
       break;
     default: // random input go to fail-safe
-
+      StopAll();
       break;
   }
 
@@ -64,4 +71,24 @@ void loop() {
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   }
+}
+
+void StopAll() {
+  for (uint8_t i = 0; i < MOTORS; i++) {
+    MotorOut[i] = 1000;
+  }
+  reset_PID_integrals();
+}
+
+void reset_PID_integrals() {
+  yaw_command_pid.IntegralReset();
+  pitch_command_pid.IntegralReset();
+  roll_command_pid.IntegralReset();
+
+  yaw_motor_pid.IntegralReset();
+  pitch_motor_pid.IntegralReset();
+  roll_motor_pid.IntegralReset();
+
+  altitude_hold_baro_pid.IntegralReset();
+  altitude_hold_sonar_pid.IntegralReset();
 }

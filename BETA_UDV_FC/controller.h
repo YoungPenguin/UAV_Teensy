@@ -1,5 +1,8 @@
-// all PID controllers has the setup  = {Kp, Ki, Kd, Anti-windup};
 
+#include "./Frames/FrameType_QuadX.h"
+
+
+// all PID controllers has the setup  = {Kp, Ki, Kd, Anti-windup};
 // Attitude - Outer loop
 float PID_YAW_c[4]   = {0.0, 0.0, 0.0, 0.0};
 float PID_PITCH_c[4] = {0.0, 0.0, 0.0, 0.0};
@@ -45,5 +48,5 @@ bool positionHoldGPS   = false;
 #define AW 3 // Anti-Windup
 
 volatile int cycles;
-unsigned short int flightflag = 0;
+uint8_t flightMode = 0;
 bool all_ready = false;

@@ -3,7 +3,7 @@ class helpers {
     helpers();
     void discretize(float* Kp, float* Ki, float* Kd);
     void dataVector(float* data);
-    unsigned int StickPos(unsigned int* a, int* input1, int* input2, int* input3, int* input4);
+    unsigned int StickPos(uint8_t* a, int* input1, int* input2, int* input3, int* input4);
   private:
     float *Kp, *Ki, *Kd, *a;
     float *sampleTime;
