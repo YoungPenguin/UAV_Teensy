@@ -14,6 +14,7 @@
 #include "MadgwickAHRS.h"
 #include "controller.h"
 #include "pid.h"
+#include "helpers.h"
 //#include <FrameType_QuadX.h>
 
 Madgwick filter;
@@ -31,14 +32,6 @@ void setup() {
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
-  /*Calculate tustin values so you dont have to*/
-  for (int i = 0; i < 3; i++) {
-    f1[i] = (tau_I[i] * K[i] + 1 ) / (tau_I[i] * K[i]);
-    f2[i] = (1 - tau_I[i] * K[i]) / (tau_I[i] * K[i]);
-    K1[i] = (tau_D[i] * K[i] + 1) / (1 + alpha[i] * tau_D[i] * K[i]);
-    K2[i] = (1 - tau_D[i] * K[i]) / (1 + alpha[i] * tau_D[i] * K[i]);
-    K3[i] = (1 - alpha[i] * tau_D[i] * K[i]) / (1 + alpha[i] * tau_D[i] * K[i]);
-  }
 
   all_ready = true;
 }
