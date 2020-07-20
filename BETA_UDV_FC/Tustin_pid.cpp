@@ -4,9 +4,9 @@
   #include "WProgram.h"
 #endif
 
-#include "pid.h"
+#include "Tustin_pid.h"
 
-PID::PID(float* Input, float* Output, float* Setpoint, float* terms) {
+Tustin_PID::Tustin_PID(float* Input, float* Output, float* Setpoint, float* terms) {
   previous_error = 0.0;
   integral = 0.0;
 
@@ -21,7 +21,7 @@ PID::PID(float* Input, float* Output, float* Setpoint, float* terms) {
   AntiWindup = &terms[3];
 }
 
-void PID::Compute() {
+void Tustin_PID::Compute() {
   unsigned long now = micros();
   float delta_time = (now - last_time) / 1000000.0;
   float error = *PID_setpoint - *PID_input;
@@ -34,6 +34,6 @@ void PID::Compute() {
   last_time = now;
 }
 
-void PID::IntegralReset() {
+void Tustin_PID::IntegralReset() {
   integral = 0.0;
 }

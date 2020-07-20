@@ -9,21 +9,61 @@
 // Arduino standard library imports
 #include <Wire.h>
 #include <EEPROM.h>
+#include <Servo.h>
 
 // Custom imports
-#include "MadgwickAHRS.h"
 #include "controller.h"
-#include "pid.h"
+#include "Tustin_pid.h"
 #include "helpers.h"
+#include "MadgwickAHRS.h"
 
-Madgwick filter;
+Servo Propeller[MOTORS];
+
+// Flight modes
+#define DISARMED      0
+#define RATE_MODE     1
+#define ACRO_MODE     2
+#define ATTITUDE_MODE 3
+
+// Primary channel definitions
+#define ROLL        0
+#define PITCH       1
+#define THROTTLE    2
+#define YAW         3
+
+// PID pseudo definitions
+#define P  0 // Proportional
+#define I  1 // Integral
+#define D  2 // Derivative
+#define AW 3 // Anti-Windup
+
+volatile int cycles;
+uint8_t flightMode = 0;
+bool all_ready = false;
+
+// FlightController commands definitions
+float commandYaw, commandYawAttitude, commandPitch, commandRoll, commandThrottle;
+
+// Heading related variables
+float headingError = 0.0;
+float headingSetpoint = 0.0;
+
+// PID variables
+float YawCommandPIDSpeed, PitchCommandPIDSpeed, RollCommandPIDSpeed;
+float YawMotor;
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   Serial.setTimeout(1);
 
-  filter.begin(400); // sample freq for prop shield. 400Hz is max in hybrid mode
+  for (uint8_t j = 0; j < MOTORS; j++) {
+    for (uint8_t i = (0 + 2); i < (MOTORS + 2); i++) {
+      Propeller[j].attach(MotorOut[i]);
+    }
+    Propeller[j].writeMicroseconds(1000);
+  }
+
 
   DDRB |= B00100000;
   PORTB &= B11011111;
@@ -48,7 +88,7 @@ void loop() {
       break;
     case RATE_MODE:
       if (THROTTLE > 1000) { // disable stabilization if throttle is very low
-        updateMotorsMix(); // Frame specific motor mix
+        // updateMotorsMix(); // Frame specific motor mix
       } else {
         StopAll();
       }
@@ -56,7 +96,7 @@ void loop() {
       break;
     case ACRO_MODE:
       if (THROTTLE > 1000) { // disable stabilization if throttle is very low
-        updateMotorsMix(); // Frame specific motor mix
+        //updateMotorsMix(); // Frame specific motor mix
       } else {
         StopAll();
       }
@@ -77,18 +117,10 @@ void StopAll() {
   for (uint8_t i = 0; i < MOTORS; i++) {
     MotorOut[i] = 1000;
   }
-  reset_PID_integrals();
 }
 
-void reset_PID_integrals() {
-  yaw_command_pid.IntegralReset();
-  pitch_command_pid.IntegralReset();
-  roll_command_pid.IntegralReset();
-
-  yaw_motor_pid.IntegralReset();
-  pitch_motor_pid.IntegralReset();
-  roll_motor_pid.IntegralReset();
-
-  altitude_hold_baro_pid.IntegralReset();
-  altitude_hold_sonar_pid.IntegralReset();
+void Write2ESC() {
+  for (uint8_t i = 0; i < MOTORS; i++) {
+    Propeller[i].writeMicroseconds(MotorOut[i]);
+  }
 }

@@ -1,6 +1,9 @@
-class PID {
+#ifndef Tustin_pid_h
+#define Tustin_pid_h
+
+class Tustin_PID {
     public:
-        PID(float* Input, float* Output, float* Setpoint, float* terms);
+        Tustin_PID(float* Input, float* Output, float* Setpoint, float* terms);
         void Compute();
         void IntegralReset();
 
@@ -16,3 +19,4 @@ class PID {
         float integral;
         unsigned long last_time;
 };
+#endif

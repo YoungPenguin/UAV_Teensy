@@ -20,7 +20,7 @@
 
 #define MOTORS 4
 uint16_t MotorOut[MOTORS] = {1000, 1000, 1000, 1000}; 
-
+/*
 void updateMotorsMix() {
     // Limit YAW to +- 200 (20%)
     YawMotorSpeed = constrain(YawMotorSpeed, -200, 200);
@@ -32,3 +32,4 @@ void updateMotorsMix() {
     MotorOut[2] = constrain(throttle - PitchMotorSpeed - RollMotorSpeed + YawMotorSpeed, CONFIG.data.minimumArmedThrottle, 2000);
     MotorOut[3] = constrain(throttle - PitchMotorSpeed + RollMotorSpeed - YawMotorSpeed, CONFIG.data.minimumArmedThrottle, 2000);    
 }
+*/
