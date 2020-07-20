@@ -52,6 +52,15 @@ float headingSetpoint = 0.0;
 float YawCommandPIDSpeed, PitchCommandPIDSpeed, RollCommandPIDSpeed;
 float YawMotor;
 
+float ax, ay, az;
+float gx, gy, gz;
+float mx, my, mz;
+float roll, pitch, heading;
+
+Madgwick filter;
+
+float data[12] = {ax, ay, az, gx, gy, gz, mx, my, mz, roll, pitch, heading};
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -71,6 +80,7 @@ void setup() {
   ARM_DEMCR |= ARM_DEMCR_TRCENA;
   ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 
+  filter.begin(400);
 
   all_ready = true;
 }
@@ -80,6 +90,15 @@ void loop() {
 
   uint32_t startCycleCPU;
   startCycleCPU = ARM_DWT_CYCCNT;
+
+  magOn ? filter.update(gx, gy, gz, ax, ay, az, mx, my, mz) : filter.updateIMU(gx, gy, gz, ax, ay, az);
+
+  // print the heading, pitch and roll
+  roll = filter.getRoll();
+  pitch = filter.getPitch();
+  heading = filter.getYaw();
+
+
 
   switch (flightMode) {
     case DISARMED:
@@ -106,7 +125,7 @@ void loop() {
       StopAll();
       break;
   }
-
+  //  helpers.dataVector(data);
   cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
   while (cycles < loop_time) {
     cycles = (ARM_DWT_CYCCNT - startCycleCPU) - 1;
@@ -115,7 +134,7 @@ void loop() {
 
 void StopAll() {
   for (uint8_t i = 0; i < MOTORS; i++) {
-    MotorOut[i] = 1000;
+    Propeller[i].writeMicroseconds(1000);
   }
 }
 
