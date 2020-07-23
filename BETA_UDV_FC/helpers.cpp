@@ -8,20 +8,6 @@
 
 helpers::helpers() {}
 
-void helpers::discretize(float* terms, float* alpha, float* T) {
-  Kp = &terms[0];
-  Ki = &terms[1];
-  Kd = &terms[2];
-  sampleTime = T;
-  float K = 2.0 / *sampleTime;
-
-  *f1 = ((*Kp / *Ki) * K + 1 ) / ((*Kp / *Ki) * K);
-  *f2 = (1 - (*Kp / *Ki) * K) / ((*Kp / *Ki) * K);
-  *K1 = ((*Kd / *Kp) * K + 1) / (1 + *alpha * (*Kd / *Kp) * K);
-  *K2 = (1 - (*Kd / *Kp) * K) / (1 + *alpha * (*Kd / *Kp) * K);
-  *K3 = (1 - *alpha * (*Kd / *Kp) * K) / (1 + *alpha * (*Kd / *Kp) * K);
-}
-
 void helpers::dataVector(float* data) {
   for (uint8_t i = 0; i < sizeof(data); i++) {
     Serial.print(data[i]);

@@ -143,3 +143,18 @@ void Write2ESC() {
     Propeller[i].writeMicroseconds(MotorOut[i]);
   }
 }
+/*
+void discretize(float* terms, float* alpha, float* T) {
+  float*  Kp = &terms[0];
+  float*  Ki = &terms[1];
+  float*  Kd = &terms[2];
+  float*  sampleTime = T;
+  float K = 2.0 / *sampleTime;
+
+  *f1 = ((*Kp / *Ki) * K + 1 ) / ((*Kp / *Ki) * K);
+  *f2 = (1 - (*Kp / *Ki) * K) / ((*Kp / *Ki) * K);
+  *K1 = ((*Kd / *Kp) * K + 1) / (1 + *alpha * (*Kd / *Kp) * K);
+  *K2 = (1 - (*Kd / *Kp) * K) / (1 + *alpha * (*Kd / *Kp) * K);
+  *K3 = (1 - *alpha * (*Kd / *Kp) * K) / (1 + *alpha * (*Kd / *Kp) * K);
+}
+*/

@@ -3,20 +3,18 @@
 
 class Tustin_PID {
     public:
-        Tustin_PID(float* Input, float* Output, float* Setpoint, float* terms);
-        void Compute();
+        Tustin_PID(float* Input, float* Setpoint, float* terms);
+        float Compute();
         void IntegralReset();
 
     private:
         float *PID_input;
-        float *PID_output;
         float *PID_setpoint;
         
-        float *Kp, *Ki, *Kd;
+        float *Kp, *f1, *f2, *K, *K1, *K2, *K3;
         float *AntiWindup;
         
-        float previous_error;
+        float previous_error, previous_D, previous_I;
         float integral;
-        unsigned long last_time;
 };
 #endif
