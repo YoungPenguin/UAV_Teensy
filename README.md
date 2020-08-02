@@ -3,9 +3,6 @@ Hello there stranger...
 
 Please be aware that there are currently **2 different branches** on this git repo. Switch to the **dev branch** if you want to get the latest updates and want to know what is currently under development.  
 
-![Farmers Market Finder Demo](unavngivet.mp4)
-
-
 Please make sure to read the entire README.md file **BEFORE** doing anything. Thank you!
 
 If you want to use this software please "fork" and "star" this project to make sure your version doesn't change and to get notified of any updates. Feel free to report issues to be fixed. Enjoy
