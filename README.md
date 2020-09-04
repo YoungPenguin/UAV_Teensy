@@ -1,7 +1,7 @@
 # Dev UAV
 Hello there stranger and welcome to the dark-side...
 
-For all my embedded systems dudes - this Flight controller will be witten in ***pure C***: Latest start August! 
+For all my embedded systems dudes - this Flight controller will be witten in ***pure C++***
 
 Please make sure to read the entire README.md file **BEFORE** doing anything. Thank you!
 Remember this is the beta branch with all the on-going development. 
